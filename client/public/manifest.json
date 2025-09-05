@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "SmartResumeAI",
+  "version": "1.0.0",
+  "description": "AI-powered resume and cover letter generator",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "identity",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.google.com/*",
+    "https://*.stripe.com/*",
+    "https://api.smartresumeai.com/*"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_GOOGLE_CLIENT_ID",
+    "scopes": [
+      "openid",
+      "email",
+      "profile"
+    ]
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "action": {
+    "default_title": "SmartResumeAI",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "externally_connectable": {
+    "matches": ["https://*.smartresumeai.com/*"]
+  }
+}

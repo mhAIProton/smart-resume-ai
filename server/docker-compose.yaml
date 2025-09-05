@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: smart-resume-ai-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/certs:/etc/nginx/certs:ro
+      - /etc/nginx/vhost.d:/etc/nginx/vhost.d
+      - /usr/share/nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - smart-resume-ai-net
+
+  smart-resume-ai-api:
+    build:                       # ⬅️ собираем локально
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-resume-ai-api
+    env_file:
+      - .env.prod                # ⬅️ берёт все секреты и ключи
+    environment:                 # ⬅️ только то, чего нет в .env
+      NODE_ENV: production
+      VIRTUAL_HOST: api.smartresumeai.com
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: api.smartresumeai.com
+      LETSENCRYPT_EMAIL: smartresumeai@gmail.com
+    expose:
+      - "3000"
+    networks:
+      - smart-resume-ai-net
+    depends_on:
+      - smart-resume-ai-pg       # ⬅️ ждём Postgres
+      - smart-resume-ai-redis    # ⬅️ ждём Redis
+
+  smart-resume-ai-pg:
+    image: postgres:15
+    container_name: smart-resume-ai-pg
+    env_file:
+      - .env.prod                # ⬅️ POSTGRES_* переменные берутся отсюда
+    volumes:
+      - smart-resume-ai-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - smart-resume-ai-net
+
+  smart-resume-ai-redis:
+    image: redis:7-alpine
+    container_name: smart-resume-ai-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - smart-resume-ai-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - smart-resume-ai-net
+
+  smart-resume-ai-worker:
+    build:                       # ⬅️ собираем локально
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: smart-resume-ai-worker
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      WORKER_MODE: true
+    networks:
+      - smart-resume-ai-net
+    depends_on:
+      - smart-resume-ai-pg
+      - smart-resume-ai-redis
+
+volumes:
+  smart-resume-ai-postgres-data:
+  smart-resume-ai-redis-data:
+
+networks:
+  smart-resume-ai-net:
+    driver: bridge
