@@ -63,7 +63,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully' })
   async logout() {
-    // In a stateless JWT setup, logout is handled on the client side
+    // In a stateless JWT setup, logout.svg is handled on the client side
     // by removing the token. We could implement token blacklisting here if needed.
     return { message: 'Logged out successfully' };
   }

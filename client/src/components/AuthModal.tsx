@@ -1,11 +1,9 @@
 import React from 'react';
-import { useAppContext} from "@/contexts/AppContextProvider.tsx";
+import { useAppContext } from "@/contexts/AppContextProvider";
 import { X, Mail } from 'lucide-react';
 
 const AuthModal: React.FC = () => {
-  const { isAuthenticated } = useAppContext();
-
-  let showAuthModal = false
+  const { showAuthModal, setShowAuthModal, login } = useAppContext();
 
   const handleGoogleAuth = () => {
     // In real app, this would trigger Google OAuth
@@ -14,15 +12,16 @@ const AuthModal: React.FC = () => {
       id: '1',
       email: 'user@example.com',
       name: 'John Doe',
-      avatar: 'https://via.placeholder.com/40',
-      plan: 'free' as const,
+      plan: 'Free' as const,
       remainingGenerations: 3
     }
 
     console.log('handleGoogleAuth', mockUser);
-    
-    // setUser(mockUser)
-    // setShowAuthModal(false)
+    login(mockUser);
+  }
+
+  const handleClose = () => {
+    setShowAuthModal(false);
   }
 
   if (!showAuthModal) return null
@@ -33,7 +32,7 @@ const AuthModal: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Sign in to continue</h3>
           <button
-            onClick={() => setShowAuthModal(false)}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600"
           >
             <X className="w-5 h-5" />
@@ -41,7 +40,7 @@ const AuthModal: React.FC = () => {
         </div>
 
         <p className="text-sm text-gray-600 mb-6">
-          Sign in to generate your {useAppStore().generationRequest?.type === 'cover-letter' ? 'cover letter' : 'resume'} and access all features.
+          Sign in to generate your resume and access all features.
         </p>
 
         <button

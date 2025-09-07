@@ -1,11 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { AppContextProvider } from './contexts/AppContextProvider';
 import Header from './components/Header';
-import Step1 from './components/steps/Step1';
-import Step2 from './components/steps/Step2';
-import Step3 from './components/steps/Step3';
-import Step4 from './components/steps/Step4';
+import BackButton from './components/BackButton';
+import StepMain from './components/steps/StepMain';
+import StepType from './components/steps/StepType';
+import StepResume from './components/steps/StepResume';
+import StepDesign from './components/steps/StepDesign';
+import StepTone from './components/steps/StepTone';
+import StepResult from './components/steps/StepResult';
 import AuthModal from './components/AuthModal';
 
 const queryClient = new QueryClient({
@@ -20,32 +24,37 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="chrome-extension">
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <main className="p-4">
-              <Routes>
-                <Route path="/" element={<Step1 />} />
-                <Route path="/step2" element={<Step2 />} />
-                <Route path="/step3" element={<Step3 />} />
-                <Route path="/step4" element={<Step4 />} />
-              </Routes>
-            </main>
-            <AuthModal />
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                },
-              }}
-            />
-          </div>
-        </Router>
-      </div>
+      <AppContextProvider>
+        <div className="chrome-extension">
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <Header />
+              <main className="p-2">
+                <Routes>
+                  <Route path="/" element={<StepMain />} />
+                  <Route path="/type" element={<StepType />} />
+                  <Route path="/resume" element={<StepResume />} />
+                  <Route path="/design" element={<StepDesign />} />
+                  <Route path="/tone" element={<StepTone />} />
+                  <Route path="/result" element={<StepResult />} />
+                </Routes>
+              </main>
+              <BackButton />
+              <AuthModal />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#363636',
+                    color: '#fff',
+                  },
+                }}
+              />
+            </div>
+          </Router>
+        </div>
+      </AppContextProvider>
     </QueryClientProvider>
   )
 }
