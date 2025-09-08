@@ -44,8 +44,8 @@ const StepMain: React.FC = () => {
       </div>
 
       {showExample && (
-        <div className="mb-4">
-          <div className="text-sm text-gray-700">
+        <div className="mb-6">
+          <div className="text-sm text-gray-400">
             {exampleJobDescription}
           </div>
         </div>
@@ -56,7 +56,7 @@ const StepMain: React.FC = () => {
           value={jobText}
           onChange={(e) => setJobText(e.target.value)}
           placeholder="Paste full job description"
-          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-3 border border-gray-300 bg-gray-200 rounded-lg resize-none focus-visible:border-gray-600"
           rows={8}
         />
 
@@ -74,7 +74,7 @@ const StepMain: React.FC = () => {
         className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
           isValid()
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-blue-200 text-white cursor-not-allowed'
         }`}
       >
         Continue

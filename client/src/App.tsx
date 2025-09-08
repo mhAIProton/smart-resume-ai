@@ -29,7 +29,8 @@ function App() {
           <Router>
             <div className="min-h-screen bg-gray-50">
               <Header />
-              <main className="p-2">
+              <BackButton />
+              <main className="px-3">
                 <Routes>
                   <Route path="/" element={<StepMain />} />
                   <Route path="/type" element={<StepType />} />
@@ -39,7 +40,6 @@ function App() {
                   <Route path="/result" element={<StepResult />} />
                 </Routes>
               </main>
-              <BackButton />
               <AuthModal />
               <Toaster
                 position="top-right"
