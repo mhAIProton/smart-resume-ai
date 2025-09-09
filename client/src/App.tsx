@@ -11,6 +11,7 @@ import StepDesign from './components/steps/StepDesign';
 import StepTone from './components/steps/StepTone';
 import StepResult from './components/steps/StepResult';
 import AuthModal from './components/AuthModal';
+import AuthCallback from './components/AuthCallback';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ function App() {
                   <Route path="/design" element={<StepDesign />} />
                   <Route path="/tone" element={<StepTone />} />
                   <Route path="/result" element={<StepResult />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                 </Routes>
               </main>
               <AuthModal />

@@ -3,21 +3,12 @@ import { useAppContext } from "@/contexts/AppContextProvider";
 import { X, Mail } from 'lucide-react';
 
 const AuthModal: React.FC = () => {
-  const { showAuthModal, setShowAuthModal, login } = useAppContext();
+  const { showAuthModal, setShowAuthModal } = useAppContext();
 
   const handleGoogleAuth = () => {
-    // In real app, this would trigger Google OAuth
-    // For demo purposes, we'll simulate a successful login
-    const mockUser = {
-      id: '1',
-      email: 'user@example.com',
-      name: 'John Doe',
-      plan: 'Free' as const,
-      remainingGenerations: 3
-    }
-
-    console.log('handleGoogleAuth', mockUser);
-    login(mockUser);
+    // Перенаправляем на Google OAuth
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    window.location.href = `${apiUrl}/auth/google`;
   }
 
   const handleClose = () => {

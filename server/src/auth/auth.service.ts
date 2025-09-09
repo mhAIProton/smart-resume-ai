@@ -1,7 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User, UserPlan } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 
@@ -27,14 +25,12 @@ export interface AuthResponse {
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(email: string): Promise<User | null> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersService.findByEmail(email);
     return user;
   }
 
@@ -60,42 +56,40 @@ export class AuthService {
   }
 
   async googleLogin(profile: any): Promise<AuthResponse> {
-    let user = await this.usersRepository.findOne({
-      where: { googleId: profile.id },
-    });
+    console.log('🔍 Processing Google profile:', profile);
+    
+    let user = await this.usersService.findByGoogleId(profile.id);
 
     if (!user) {
       // Check if user exists with this email
-      user = await this.usersRepository.findOne({
-        where: { email: profile.emails[0].value },
-      });
+      user = await this.usersService.findByEmail(profile.email);
 
       if (user) {
         // Link Google account to existing user
         user.googleId = profile.id;
-        user.avatar = profile.photos[0]?.value;
-        await this.usersRepository.save(user);
+        user.avatar = profile.avatar;
+        await this.usersService.update(user.id, user);
       } else {
         // Create new user
         user = await this.usersService.create({
-          email: profile.emails[0].value,
-          name: profile.displayName,
+          email: profile.email,
+          name: profile.name,
           googleId: profile.id,
-          avatar: profile.photos[0]?.value,
+          avatar: profile.avatar,
         });
       }
     } else {
       // Update user info
-      user.name = profile.displayName;
-      user.avatar = profile.photos[0]?.value;
-      await this.usersRepository.save(user);
+      user.name = profile.name;
+      user.avatar = profile.avatar;
+      await this.usersService.update(user.id, user);
     }
 
     return this.login(user);
   }
 
   async refreshToken(userId: string): Promise<AuthResponse> {
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    const user = await this.usersService.findById(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -104,9 +98,7 @@ export class AuthService {
   }
 
   async validateJwtPayload(payload: JwtPayload): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { id: payload.sub },
-    });
+    const user = await this.usersService.findById(payload.sub);
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid token or user inactive');

@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, createContext, useContext } from 'react';
+import React, { useState, ReactNode, createContext, useContext, useEffect } from 'react';
 
 export interface User {
     id?: string;
@@ -128,7 +128,44 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         setSelectedTone(null);
         setResumeData(null);
         setSelectedDesign(null);
+        localStorage.removeItem('auth_token');
     };
+
+    // Функция для проверки авторизации при загрузке приложения
+    const checkAuth = async () => {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUser({
+                        id: userData.id,
+                        email: userData.email,
+                        name: userData.name,
+                        plan: userData.plan,
+                        remainingGenerations: userData.remainingGenerations,
+                    });
+                } else {
+                    // Токен недействителен, удаляем его
+                    localStorage.removeItem('auth_token');
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+                localStorage.removeItem('auth_token');
+            }
+        }
+    };
+
+    // Проверяем авторизацию при загрузке приложения
+    useEffect(() => {
+        checkAuth();
+    }, []);
 
     return (
         <AppContext.Provider

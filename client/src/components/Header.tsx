@@ -36,14 +36,14 @@ const Header: React.FC = () => {
           {/* Auth button */}
           <button
               onClick={handleAuth}
-              className="flex items-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 hover:bg-gray-200 transition-colors h-8"
+              className={`flex items-center space-x-1 rounded-lg px-2 py-1 transition-colors h-8 ${isAuthenticated ? 'bg-blue-50 hover:bg-blue-100' : 'bg-gray-100 hover:bg-gray-200'}`}
           >
             {isAuthenticated ? (
                 <>
                   <img
                       src="/logout.svg"
                       alt="Logout"
-                      className="w-3 h-3"
+                      className="h-6"
                   />
                 </>
             ) : (

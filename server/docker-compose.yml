@@ -1,0 +1,56 @@
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: smart-resume-ai-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/certs:/etc/nginx/certs:ro
+      - /etc/nginx/vhost.d:/etc/nginx/vhost.d
+      - /usr/share/nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - smart-resume-ai-net
+
+  smart-resume-ai-api:
+    build:                       # собираем локально
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-resume-ai-api
+    env_file:
+      - .env.local                # берёт все секреты и ключи
+    environment:                 # только то, чего нет в .env
+      NODE_ENV: development      # development | production
+      VIRTUAL_HOST: api.smartresumeai.com
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: api.smartresumeai.com
+      LETSENCRYPT_EMAIL: smartresumeai@gmail.com
+    ports:
+      - "3000:3000"             # пробрасываем порт на хост
+    networks:
+      - smart-resume-ai-net
+    depends_on:
+      - smart-resume-ai-pg       # ждём Postgres
+
+  smart-resume-ai-pg:
+    image: postgres:15
+    container_name: smart-resume-ai-pg
+    env_file:
+      - .env.local              # POSTGRES_* переменные берутся отсюда
+    volumes:
+      - smart-resume-ai-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - smart-resume-ai-net
+
+volumes:
+  smart-resume-ai-postgres-data:
+
+networks:
+  smart-resume-ai-net:
+    driver: bridge

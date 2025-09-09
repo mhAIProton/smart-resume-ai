@@ -43,7 +43,7 @@ Backend API server for SmartResumeAI Chrome extension, built with NestJS and Typ
 
 3. Set up environment variables:
    ```bash
-   cp .env.example .env.local
+   cp .env.prod .env.local
    # Edit .env.local with your configuration
    ```
 

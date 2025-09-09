@@ -23,11 +23,20 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.googleLogin(req.user);
-    
-    // Redirect to frontend with token
-    const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${result.access_token}`;
-    res.redirect(redirectUrl);
+    try {
+      console.log('🔐 Google OAuth callback received');
+      console.log('  User data:', req.user);
+      
+      const result = await this.authService.googleLogin(req.user);
+      
+      // Redirect to frontend with token
+      const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${result.access_token}`;
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('❌ Google OAuth callback error:', error);
+      const errorUrl = `${process.env.FRONTEND_URL}/auth/callback?error=oauth_error`;
+      res.redirect(errorUrl);
+    }
   }
 
   @Post('refresh')
