@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppContext } from "@/contexts/AppContextProvider"
 
 const Header: React.FC = () => {
-  const { isAuthenticated, user, setShowAuthModal, logout } = useAppContext();
+  const { isAuthenticated, user, setShowAuthModal, setShowSubscriptionsPopup, setShowLoader, logout } = useAppContext();
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
@@ -16,6 +16,18 @@ const Header: React.FC = () => {
     } else {
       setShowAuthModal(true);
     }
+  };
+
+  const handlePlanClick = () => {
+    setShowSubscriptionsPopup(true);
+  };
+
+  const handleGenerationsClick = () => {
+    setShowLoader(true);
+    // Auto-hide loader after 3 seconds for demonstration
+    setTimeout(() => {
+      setShowLoader(false);
+    }, 5000);
   };
 
   return (
@@ -54,23 +66,29 @@ const Header: React.FC = () => {
 
         <div className="flex items-center justify-between gap-1">
           {/* Plan badge */}
-          <div className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-md px-2 py-1 h-8">
+          <button
+            onClick={handlePlanClick}
+            className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-md px-2 py-1 h-8 hover:bg-gray-200 transition-colors"
+          >
             <img
                 src="/plan.svg"
                 alt="Plan"
                 className="w-4 h-4"
             />
-            <span className="text-xs font-medium text-gray-700">
-                {user?.plan || 'Free Plan'}
+            <span className="text-xs font-medium text-gray-700 capitalize">
+                {user?.plan ? `${user?.plan} plan` : 'free plan'}
               </span>
-          </div>
+          </button>
 
           {/* Generations left badge */}
-          <div className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-8">
+          <button
+            onClick={handleGenerationsClick}
+            className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-8 hover:bg-gray-200 transition-colors"
+          >
               <span className="text-xs text-gray-700">
                 <b>{user?.remainingGenerations || 0}</b>/<b>3</b> AI-generations
               </span>
-          </div>
+          </button>
         </div>
       </header>
   )

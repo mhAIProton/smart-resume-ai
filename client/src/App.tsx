@@ -12,6 +12,9 @@ import StepTone from './components/steps/StepTone';
 import StepResult from './components/steps/StepResult';
 import AuthModal from './components/AuthModal';
 import AuthCallback from './components/AuthCallback';
+import SubscriptionsPopup from './components/SubscriptionsPopup';
+import MessagePopup from './components/MessagePopup';
+import Loader from './components/Loader';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +46,9 @@ function App() {
                 </Routes>
               </main>
               <AuthModal />
+              <SubscriptionsPopup />
+              <MessagePopup />
+              <Loader />
               <Toaster
                 position="top-right"
                 toastOptions={{

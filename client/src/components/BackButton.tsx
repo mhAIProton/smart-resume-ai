@@ -6,7 +6,7 @@ const BackButton: React.FC = () => {
     const location = useLocation();
 
     // Не показывать кнопку Back на главной странице и на странице результата
-    if (location.pathname === '/' || location.pathname === '/result') {
+    if (location.pathname === '/') {
         return null;
     }
 

@@ -19,31 +19,32 @@ const AuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Sign in to continue</h3>
+      <div className="bg-white rounded-lg w-[350px] max-w-full p-3">
+        <div className="flex flex-col justify-center mb-4">
+          {/* Close button */}
           <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600"
+              onClick={handleClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors ml-auto"
           >
-            <X className="w-5 h-5" />
+            <img
+                src="/squared-cross.svg"
+                alt="Close"
+                className="h-6"
+            />
           </button>
+          <h3 className="text-2xl text-center px-5 font-semibold text-gray-900">Sign up to save and continue</h3>
         </div>
 
-        <p className="text-sm text-gray-600 mb-6">
-          Sign in to generate your resume and access all features.
-        </p>
-
         <button
-          onClick={handleGoogleAuth}
-          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            onClick={handleGoogleAuth}
+            className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <Mail className="w-5 h-5" />
+          <img src="/google.svg" alt="Continue with Google"/>
           <span>Continue with Google</span>
         </button>
 
-        <div className="mt-4 text-xs text-gray-500 text-center">
-          By signing in, you agree to our Terms of Service and Privacy Policy
+        <div className="pt-4 pb-8 text-xs text-gray-500 text-center">
+          Secure login. We’ll never post anything.
         </div>
       </div>
     </div>

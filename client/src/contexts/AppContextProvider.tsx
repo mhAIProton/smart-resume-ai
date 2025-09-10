@@ -44,6 +44,15 @@ export interface AppContextType {
     // UI state
     loading: boolean;
     showAuthModal: boolean;
+    showSubscriptionsPopup: boolean;
+    showMessagePopup: boolean;
+    showLoader: boolean;
+    messagePopupData: {
+        type: 'message' | 'error';
+        title: string;
+        subtitle: string;
+        buttonText?: string;
+    } | null;
     
     // Actions
     setUser: (user: User | null) => void;
@@ -54,6 +63,15 @@ export interface AppContextType {
     setSelectedDesign: (design: 'classic' | 'modern' | 'minimal' | null) => void;
     setLoading: (loading: boolean) => void;
     setShowAuthModal: (show: boolean) => void;
+    setShowSubscriptionsPopup: (show: boolean) => void;
+    setShowMessagePopup: (show: boolean) => void;
+    setShowLoader: (show: boolean) => void;
+    setMessagePopupData: (data: {
+        type: 'message' | 'error';
+        title: string;
+        subtitle: string;
+        buttonText?: string;
+    } | null) => void;
     login: (user: User) => void;
     logout: () => void;
 }
@@ -68,6 +86,10 @@ export const AppContext = createContext<AppContextType>({
     selectedDesign: null,
     loading: false,
     showAuthModal: false,
+    showSubscriptionsPopup: false,
+    showMessagePopup: false,
+    showLoader: false,
+    messagePopupData: null,
     setUser: () => {},
     setJobDescription: () => {},
     setGenerationType: () => {},
@@ -76,6 +98,10 @@ export const AppContext = createContext<AppContextType>({
     setSelectedDesign: () => {},
     setLoading: () => {},
     setShowAuthModal: () => {},
+    setShowSubscriptionsPopup: () => {},
+    setShowMessagePopup: () => {},
+    setShowLoader: () => {},
+    setMessagePopupData: () => {},
     login: () => {},
     logout: () => {},
 });
@@ -90,6 +116,15 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedDesign, setSelectedDesignState] = useState<'classic' | 'modern' | 'minimal' | null>(null);
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showSubscriptionsPopup, setShowSubscriptionsPopup] = useState(false);
+    const [showMessagePopup, setShowMessagePopup] = useState(false);
+    const [showLoader, setShowLoader] = useState(false);
+    const [messagePopupData, setMessagePopupData] = useState<{
+        type: 'message' | 'error';
+        title: string;
+        subtitle: string;
+        buttonText?: string;
+    } | null>(null);
 
     const setUser = (user: User | null) => {
         setUserState(user);
@@ -179,6 +214,10 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 selectedDesign,
                 loading,
                 showAuthModal,
+                showSubscriptionsPopup,
+                showMessagePopup,
+                showLoader,
+                messagePopupData,
                 setUser,
                 setJobDescription,
                 setGenerationType,
@@ -187,6 +226,10 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 setSelectedDesign,
                 setLoading,
                 setShowAuthModal,
+                setShowSubscriptionsPopup,
+                setShowMessagePopup,
+                setShowLoader,
+                setMessagePopupData,
                 login,
                 logout,
             }}
