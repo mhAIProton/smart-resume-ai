@@ -1,48 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {Copy, Download, RefreshCcw} from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContextProvider';
 import toast from 'react-hot-toast';
 
 const StepResult: React.FC = () => {
-  const { generationType, selectedTone, resumeData, jobDescription } = useAppContext();
+  const { generationType, isAuthenticated, setShowAuthModal } = useAppContext();
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isGeneratedError, setIsGeneratedError] = useState(false);
+
+  // Проверяем авторизацию при загрузке компонента
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      setLoading(true)
+    }
+  }, [isAuthenticated, setShowAuthModal]);
 
   // Примеры контента на основе выбранного типа
   const getGeneratedContent = () => {
     if (generationType === 'cover-letter') {
       return `Cover Letter
 
-Hello,
+      Hello,
 
-I'm excited to apply for the [Job Title] position at [Company Name]. Though I am at the beginning of my career, I bring a strong willingness to learn, a proactive mindset, and a passion for [industry or field, e.g., digital product development].
+      I'm excited to apply for the [Job Title] position at [Company Name]. Though I am at the beginning of my career, I bring a strong willingness to learn, a proactive mindset, and a passion for [industry or field, e.g., digital product development].
 
-I'm confident that my foundational skills and enthusiasm for growth make me a good fit for your team. I would love the opportunity to contribute and gain experience in a dynamic environment like yours.
+      I'm confident that my foundational skills and enthusiasm for growth make me a good fit for your team. I would love the opportunity to contribute and gain experience in a dynamic environment like yours.
 
-Thank you for considering my application. I look forward to the opportunity to speak with you.
+      Thank you for considering my application. I look forward to the opportunity to speak with you.
 
-Best regards, [Full Name]`;
-    } else {
-      return `Resume: Junior Project Manager
+      Best regards, [Full Name]`;
+          } else {
+            return `Resume: Junior Project Manager
 
-First Last Name
-📍 City, Country | 📞 +7 XXX XXX-XX-XX | ✉️ email@oo.com
+      First Last Name
+      📍 City, Country | 📞 +7 XXX XXX-XX-XX | ✉️ email@oo.com
 
-Key Skills:
-- Project Management (Agile, Scrum)
-- Project Planning and Timeline Management
-- Risk Management
-- Stakeholder Communication
-- Tools: Jira, Trello, MS Project, Confluence
-- Reporting and Documentation
+      Key Skills:
+      - Project Management (Agile, Scrum)
+      - Project Planning and Timeline Management
+      - Risk Management
+      - Stakeholder Communication
+      - Tools: Jira, Trello, MS Project, Confluence
+      - Reporting and Documentation
 
-Experience:
-[Work Experience Section]
+      Experience:
+      [Work Experience Section]
 
-Education:
-[Education Section]
+      Education:
+      [Education Section]
 
-Projects:
-[Projects Section]`;
+      Projects:
+      [Projects Section]`;
     }
   };
 
@@ -66,6 +76,33 @@ Projects:
     toast.success('Downloading PDF...');
     // Здесь будет логика скачивания PDF
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[72vh]">
+        <img src="/generating.svg" alt="Loading" className='h-10 w-10 animate-spin mb-4' />
+        <h2 className='font-medium text-2xl mb-4'>Generating</h2>
+        <p className='text-gray-500 text-sm'>{generationType === 'cover-letter' ? 'Cover letter' : 'Resume'}</p>
+      </div>
+    );
+  }
+
+  if (isGeneratedError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[72vh]">
+        <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>We couldn’t generate your draft.<br/> Please try again.</h3>
+        <div className='w-full px-8'>
+          <button
+            onClick={handleRegenerate}
+            className="group flex-1 w-full text-white h-11 flex items-center justify-center space-x-2 py-2 px-4 rounded-lg bg-blue-700 hover:bg-blue-800 transition-colors"
+          >
+            <RefreshCcw className="w-4 h-4 group-hover:animate-spin" />
+            <span className="text-sm font-medium">Retry</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -120,14 +157,6 @@ Projects:
           <Download className="w-4 h-4" />
           <span className="font-medium">Download PDF</span>
         </button>
-      </div>
-
-      {/* Debug info (можно убрать в продакшене) */}
-      <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-600">
-        <div>Type: {generationType}</div>
-        <div>Tone: {selectedTone}</div>
-        <div>Resume Option: {resumeData?.option}</div>
-        <div>Job Description: {jobDescription ? 'Provided' : 'Not provided'}</div>
       </div>
     </div>
   );
