@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
 
@@ -11,9 +11,8 @@ interface DesignOption {
 
 const StepDesign: React.FC = () => {
     const navigate = useNavigate();
-    const context = useAppContext();
-    const {selectedDesign: contextDesign, setSelectedDesign} = context as any;
-    const [selectedDesign, setSelectedDesignLocal] = useState<'classic' | 'modern' | 'minimal' | null>(contextDesign);
+    const {selectedDesign: contextDesign, setSelectedDesign} = useAppContext();
+    const [selectedDesign, setSelectedDesignLocal] = useState<'classic' | 'modern' | 'minimal' | null>(null);
 
     const designOptions: DesignOption[] = [
         {
@@ -35,6 +34,13 @@ const StepDesign: React.FC = () => {
             example: 'Ultra-clean design with plenty of white space, minimal colors, and focus on content. Great for design and consulting roles.'
         }
     ];
+
+    // Восстанавливаем выбранный дизайн из контекста при загрузке компонента
+    useEffect(() => {
+        if (contextDesign) {
+            setSelectedDesignLocal(contextDesign);
+        }
+    }, [contextDesign]);
 
     const handleDesignChange = (design: 'classic' | 'modern' | 'minimal') => {
         setSelectedDesignLocal(design);

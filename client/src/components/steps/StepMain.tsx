@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
 
@@ -8,11 +8,18 @@ import {useAppContext} from '@/contexts/AppContextProvider';
  */
 const StepMain: React.FC = () => {
     const navigate = useNavigate();
-    const {setJobDescription, user} = useAppContext();
+    const {jobDescription, setJobDescription, user} = useAppContext();
     const [jobText, setJobText] = useState('');
     const [showExample, setShowExample] = useState(false);
 
     const exampleJobDescription = `We're looking for a Marketing Specialist to help plan and execute marketing campaigns across social media, email, and ads. You'll work with the content team, update the website, and support events like webinars and trade shows.`;
+
+    // Восстанавливаем текст из контекста при загрузке компонента
+    useEffect(() => {
+        if (jobDescription?.text) {
+            setJobText(jobDescription.text);
+        }
+    }, [jobDescription]);
 
     const handleContinue = () => {
         if (isValid()) {

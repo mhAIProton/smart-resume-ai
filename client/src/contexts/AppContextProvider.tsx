@@ -19,6 +19,7 @@ export interface ResumeData {
     generateText?: string;
     improveText?: string;
     uploadedFile?: File;
+    uploadedFileName?: string; // Для отображения имени файла
 }
 
 export interface AppContextType {
@@ -74,6 +75,7 @@ export interface AppContextType {
     } | null) => void;
     login: (user: User) => void;
     logout: () => void;
+    clearFormData: () => void; // Новая функция для очистки данных форм
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -104,7 +106,17 @@ export const AppContext = createContext<AppContextType>({
     setMessagePopupData: () => {},
     login: () => {},
     logout: () => {},
+    clearFormData: () => {},
 });
+
+// Ключи для localStorage
+const STORAGE_KEYS = {
+    JOB_DESCRIPTION: 'smart_resume_job_description',
+    GENERATION_TYPE: 'smart_resume_generation_type',
+    SELECTED_TONE: 'smart_resume_selected_tone',
+    RESUME_DATA: 'smart_resume_resume_data',
+    SELECTED_DESIGN: 'smart_resume_selected_design',
+};
 
 export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -126,6 +138,25 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         buttonText?: string;
     } | null>(null);
 
+    // Функции для работы с localStorage
+    const saveToStorage = (key: string, data: any) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+        }
+    };
+
+    const loadFromStorage = (key: string) => {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.error('Error loading from localStorage:', error);
+            return null;
+        }
+    };
+
     const setUser = (user: User | null) => {
         setUserState(user);
         setIsAuthenticated(!!user);
@@ -133,22 +164,65 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const setJobDescription = (jobDescription: JobDescription | null) => {
         setJobDescriptionState(jobDescription);
+        if (jobDescription) {
+            saveToStorage(STORAGE_KEYS.JOB_DESCRIPTION, jobDescription);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.JOB_DESCRIPTION);
+        }
     };
 
     const setGenerationType = (type: 'resume' | 'cover-letter' | null) => {
         setGenerationTypeState(type);
+        if (type) {
+            saveToStorage(STORAGE_KEYS.GENERATION_TYPE, type);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.GENERATION_TYPE);
+        }
     };
 
     const setSelectedTone = (tone: 'formal' | 'friendly' | 'bold' | null) => {
         setSelectedToneState(tone);
+        if (tone) {
+            saveToStorage(STORAGE_KEYS.SELECTED_TONE, tone);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.SELECTED_TONE);
+        }
     };
 
     const setResumeData = (data: ResumeData | null) => {
         setResumeDataState(data);
+        if (data) {
+            // Сохраняем данные без File объекта (он не сериализуется)
+            const dataToSave = {
+                ...data,
+                uploadedFile: undefined, // Убираем File объект
+            };
+            saveToStorage(STORAGE_KEYS.RESUME_DATA, dataToSave);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.RESUME_DATA);
+        }
     };
 
     const setSelectedDesign = (design: 'classic' | 'modern' | 'minimal' | null) => {
         setSelectedDesignState(design);
+        if (design) {
+            saveToStorage(STORAGE_KEYS.SELECTED_DESIGN, design);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.SELECTED_DESIGN);
+        }
+    };
+
+    const clearFormData = () => {
+        setJobDescription(null);
+        setGenerationType(null);
+        setSelectedTone(null);
+        setResumeData(null);
+        setSelectedDesign(null);
+        
+        // Очищаем localStorage
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
     };
 
     const login = (user: User) => {
@@ -158,11 +232,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const logout = () => {
         setUser(null);
-        setJobDescription(null);
-        setGenerationType(null);
-        setSelectedTone(null);
-        setResumeData(null);
-        setSelectedDesign(null);
+        clearFormData();
         localStorage.removeItem('auth_token');
     };
 
@@ -197,9 +267,25 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     };
 
-    // Проверяем авторизацию при загрузке приложения
+    // Загружаем сохраненные данные форм при инициализации
+    const loadFormData = () => {
+        const savedJobDescription = loadFromStorage(STORAGE_KEYS.JOB_DESCRIPTION);
+        const savedGenerationType = loadFromStorage(STORAGE_KEYS.GENERATION_TYPE);
+        const savedSelectedTone = loadFromStorage(STORAGE_KEYS.SELECTED_TONE);
+        const savedResumeData = loadFromStorage(STORAGE_KEYS.RESUME_DATA);
+        const savedSelectedDesign = loadFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
+
+        if (savedJobDescription) setJobDescriptionState(savedJobDescription);
+        if (savedGenerationType) setGenerationTypeState(savedGenerationType);
+        if (savedSelectedTone) setSelectedToneState(savedSelectedTone);
+        if (savedResumeData) setResumeDataState(savedResumeData);
+        if (savedSelectedDesign) setSelectedDesignState(savedSelectedDesign);
+    };
+
+    // Проверяем авторизацию и загружаем данные форм при загрузке приложения
     useEffect(() => {
         checkAuth();
+        loadFormData();
     }, []);
 
     return (
@@ -232,6 +318,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 setMessagePopupData,
                 login,
                 logout,
+                clearFormData,
             }}
         >
             {children}

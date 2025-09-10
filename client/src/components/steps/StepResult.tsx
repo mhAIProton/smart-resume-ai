@@ -4,7 +4,7 @@ import { useAppContext } from '@/contexts/AppContextProvider';
 import toast from 'react-hot-toast';
 
 const StepResult: React.FC = () => {
-  const { generationType, isAuthenticated, setShowAuthModal } = useAppContext();
+  const { generationType, isAuthenticated, setShowAuthModal, clearFormData } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isGeneratedError, setIsGeneratedError] = useState(false);
@@ -77,6 +77,14 @@ const StepResult: React.FC = () => {
     // Здесь будет логика скачивания PDF
   };
 
+  const handleStartNew = () => {
+    // Очищаем все данные форм
+    clearFormData();
+    // toast.success('Starting new generation...');
+    // Перенаправляем на первый шаг
+    window.location.href = '/';
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
@@ -90,7 +98,7 @@ const StepResult: React.FC = () => {
   if (isGeneratedError) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
-        <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>We couldn’t generate your draft.<br/> Please try again.</h3>
+        <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>We couldn't generate your draft.<br/> Please try again.</h3>
         <div className='w-full px-8'>
           <button
             onClick={handleRegenerate}
@@ -156,6 +164,14 @@ const StepResult: React.FC = () => {
         >
           <Download className="w-4 h-4" />
           <span className="font-medium">Download PDF</span>
+        </button>
+
+        {/* Start New button */}
+        <button
+          onClick={handleStartNew}
+          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <span className="font-medium">Start New Generation</span>
         </button>
       </div>
     </div>

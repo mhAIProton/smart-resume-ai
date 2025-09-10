@@ -1,11 +1,11 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {useAppContext} from '@/contexts/AppContextProvider'
 
 const StepResume: React.FC = () => {
     const navigate = useNavigate()
     const {resumeData, setResumeData} = useAppContext()
-    const [selectedOption, setSelectedOption] = useState<'generate' | 'improve' | null>(resumeData?.option || null)
+    const [selectedOption, setSelectedOption] = useState<'generate' | 'improve' | null>(null)
     const [generateText, setGenerateText] = useState('')
     const [improveText, setImproveText] = useState('')
     const [improveTab, setImproveTab] = useState<'paste' | 'upload'>('paste')
@@ -13,6 +13,24 @@ const StepResume: React.FC = () => {
     const [showExample, setShowExample] = useState(false)
 
     const exampleText = '5+ years in product design, skilled in Figma, UX writing, accessibility, looking for a role in health tech'
+
+    // Восстанавливаем данные из контекста при загрузке компонента
+    useEffect(() => {
+        if (resumeData) {
+            setSelectedOption(resumeData.option)
+            if (resumeData.generateText) {
+                setGenerateText(resumeData.generateText)
+            }
+            if (resumeData.improveText) {
+                setImproveText(resumeData.improveText)
+                setImproveTab('paste')
+            }
+            if (resumeData.uploadedFile) {
+                setUploadedFile(resumeData.uploadedFile)
+                setImproveTab('upload')
+            }
+        }
+    }, [resumeData])
 
     const handleGenerateContinue = () => {
         if (selectedOption === 'generate' && generateText.trim()) {
@@ -29,7 +47,8 @@ const StepResume: React.FC = () => {
             setResumeData({
                 option: 'improve',
                 improveText: improveText.trim(),
-                uploadedFile: uploadedFile || undefined
+                uploadedFile: uploadedFile || undefined,
+                uploadedFileName: uploadedFile?.name
             });
             navigate('/design');
         }
@@ -39,6 +58,17 @@ const StepResume: React.FC = () => {
         const file = event.target.files?.[0]
         if (file && file.type === 'application/pdf') {
             setUploadedFile(file)
+            // Очищаем текст при загрузке файла
+            setImproveText('')
+        }
+    }
+
+    const handleRemoveFile = () => {
+        setUploadedFile(null)
+        // Очищаем input
+        const fileInput = document.getElementById('pdf-upload') as HTMLInputElement
+        if (fileInput) {
+            fileInput.value = ''
         }
     }
 
@@ -201,15 +231,35 @@ const StepResume: React.FC = () => {
                                                 className="hidden"
                                                 id="pdf-upload"
                                             />
-                                            <label
-                                                htmlFor="pdf-upload"
-                                                className="w-full justify-center cursor-pointer inline-flex items-center space-x-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors"
-                                            >
-                                                <img src="/upload.svg" alt="Upload File"/>
-                                                <span>Upload File</span>
-                                            </label>
-                                            {uploadedFile && (
-                                                <p className="mt-2 text-sm text-gray-600">{uploadedFile.name}</p>
+                                            
+                                            {uploadedFile ? (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-center space-x-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                                                        <img src="/upload.svg" alt="File uploaded" className="w-5 h-5 text-green-600"/>
+                                                        <span className="text-sm text-green-700 font-medium">{uploadedFile.name}</span>
+                                                        <button
+                                                            onClick={handleRemoveFile}
+                                                            className="ml-2 text-red-600 hover:text-red-700"
+                                                            title="Remove file"
+                                                        >
+                                                            <img src="/squared-cross.svg" alt="Remove" className="w-4 h-4"/>
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => document.getElementById('pdf-upload')?.click()}
+                                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                                    >
+                                                        Upload different file
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <label
+                                                    htmlFor="pdf-upload"
+                                                    className="w-full justify-center cursor-pointer inline-flex items-center space-x-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors"
+                                                >
+                                                    <img src="/upload.svg" alt="Upload File"/>
+                                                    <span>Upload File</span>
+                                                </label>
                                             )}
                                         </div>
                                     )}
