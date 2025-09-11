@@ -1,0 +1,26 @@
+services:
+  smart-resume-ai-pg:
+    image: postgres:15
+    container_name: smart-resume-ai-pg-dev
+    environment:
+      POSTGRES_DB: smart_resume_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - smart-resume-ai-postgres-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - smart-resume-ai-dev-net
+
+volumes:
+  smart-resume-ai-postgres-dev-data:
+
+networks:
+  smart-resume-ai-dev-net:
+    driver: bridge

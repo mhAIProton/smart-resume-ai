@@ -33,6 +33,10 @@ body {
   border-right: 1px solid #e2e8f0;
 }
 
+.draft-container {
+  max-height: calc(100vh - 400px);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -54,7 +58,7 @@ body {
 /* Loading animation */
 @keyframes spin {
   to {
-    transform: rotate(360deg);
+    transform: rotate(-360deg);
   }
 }
 

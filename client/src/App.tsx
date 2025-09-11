@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { AppContextProvider } from './contexts/AppContextProvider';
+import { AppContextProvider, useAppContext } from './contexts/AppContextProvider';
 import Header from './components/Header';
 import BackButton from './components/BackButton';
 import StepMain from './components/steps/StepMain';
@@ -15,6 +15,8 @@ import AuthCallback from './components/AuthCallback';
 import SubscriptionsPopup from './components/SubscriptionsPopup';
 import MessagePopup from './components/MessagePopup';
 import Loader from './components/Loader';
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,12 +27,33 @@ const queryClient = new QueryClient({
   },
 })
 
+// Component to handle OAuth error detection
+const OAuthErrorHandler: React.FC = () => {
+  const { setOauthError, setShowAuthModal } = useAppContext();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'oauth_failed') {
+      setOauthError(true);
+      setShowAuthModal(true);
+      // Clean up the URL by removing the error parameter
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('error');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [searchParams, setOauthError, setShowAuthModal]);
+
+  return null;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppContextProvider>
         <div className="chrome-extension">
           <Router>
+            <OAuthErrorHandler />
             <div className="min-h-screen bg-gray-50">
               <Header />
               <BackButton />

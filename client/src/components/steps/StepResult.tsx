@@ -1,59 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import {Copy, Download, RefreshCcw} from 'lucide-react';
-import { useAppContext } from '@/contexts/AppContextProvider';
+import { useAppContext, User } from '@/contexts/AppContextProvider';
+import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
 
 const StepResult: React.FC = () => {
-  const { generationType, isAuthenticated, setShowAuthModal, clearFormData } = useAppContext();
+  const { 
+    generationType, 
+    isAuthenticated, 
+    setShowAuthModal, 
+    clearFormData,
+    jobDescription,
+    selectedTone,
+    resumeData,
+    selectedDesign,
+    user,
+    setUser
+  } = useAppContext();
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [isGeneratedError, setIsGeneratedError] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<string>('');
+  
+  const generateResume = useGenerateResume();
+  const generateCoverLetter = useGenerateCoverLetter();
 
   // Проверяем авторизацию при загрузке компонента
   useEffect(() => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
-      setLoading(true)
+    } else {
+      generateContent();
     }
   }, [isAuthenticated, setShowAuthModal]);
 
-  // Примеры контента на основе выбранного типа
-  const getGeneratedContent = () => {
-    if (generationType === 'cover-letter') {
-      return `Cover Letter
-
-      Hello,
-
-      I'm excited to apply for the [Job Title] position at [Company Name]. Though I am at the beginning of my career, I bring a strong willingness to learn, a proactive mindset, and a passion for [industry or field, e.g., digital product development].
-
-      I'm confident that my foundational skills and enthusiasm for growth make me a good fit for your team. I would love the opportunity to contribute and gain experience in a dynamic environment like yours.
-
-      Thank you for considering my application. I look forward to the opportunity to speak with you.
-
-      Best regards, [Full Name]`;
-          } else {
-            return `Resume: Junior Project Manager
-
-      First Last Name
-      📍 City, Country | 📞 +7 XXX XXX-XX-XX | ✉️ email@oo.com
-
-      Key Skills:
-      - Project Management (Agile, Scrum)
-      - Project Planning and Timeline Management
-      - Risk Management
-      - Stakeholder Communication
-      - Tools: Jira, Trello, MS Project, Confluence
-      - Reporting and Documentation
-
-      Experience:
-      [Work Experience Section]
-
-      Education:
-      [Education Section]
-
-      Projects:
-      [Projects Section]`;
+  // Функция для генерации контента
+  const generateContent = async () => {
+    if (!isAuthenticated || !jobDescription || !generationType) {
+      return;
     }
+
+    try {
+      let content;
+
+      if (generationType === 'resume') {
+        // Генерируем резюме
+        const request = {
+          jobDescription: jobDescription.text,
+          userExperience: resumeData?.option === 'generate' ? resumeData.generateText : undefined,
+          existingResume: resumeData?.option === 'improve' ? resumeData.improveText : undefined,
+          design: selectedDesign || 'classic'
+        };
+
+        content = await generateResume.execute(request);
+      } else {
+        // Генерируем сопроводительное письмо
+        const request = {
+          jobDescription: jobDescription.text,
+          tone: selectedTone || 'formal'
+        };
+
+        content = await generateCoverLetter.execute(request);
+      }
+
+      if (content) {
+        setGeneratedContent(content);
+        toast.success('Content generated successfully!');
+        setUser({
+          ...user, 
+          remainingGenerations: Math.max(0, Number(user?.remainingGenerations) - 1)
+        } as User);
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      toast.error('Failed to generate content. Please try again.');
+    }
+  };
+
+  // Получаем сгенерированный контент
+  const getGeneratedContent = () => {
+    return generatedContent || 'Generating content...';
   };
 
   const handleCopyText = async () => {
@@ -67,9 +91,9 @@ const StepResult: React.FC = () => {
     }
   };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = async () => {
     toast.success('Regenerating content...');
-    // Здесь будет логика регенерации контента
+    await generateContent();
   };
 
   const handleDownloadPDF = () => {
@@ -85,7 +109,7 @@ const StepResult: React.FC = () => {
     window.location.href = '/';
   };
 
-  if (loading) {
+  if (generateResume.loading || generateCoverLetter.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
         <img src="/generating.svg" alt="Loading" className='h-10 w-10 animate-spin mb-4' />
@@ -95,7 +119,7 @@ const StepResult: React.FC = () => {
     );
   }
 
-  if (isGeneratedError) {
+  if (generateResume.error || generateCoverLetter.error) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
         <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>We couldn't generate your draft.<br/> Please try again.</h3>
@@ -128,7 +152,7 @@ const StepResult: React.FC = () => {
 
       {/* Content */}
       <div className="mb-6">
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="draft-container bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-y-auto">
           <div className="whitespace-pre-line text-sm text-gray-800 font-mono leading-relaxed">
             {getGeneratedContent()}
           </div>
@@ -136,21 +160,21 @@ const StepResult: React.FC = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="space-y-3">
+      <div className="space-y-3 pb-3">
         {/* Regenerate and Copy buttons */}
         <div className="flex space-x-2">
           <button
             onClick={handleRegenerate}
-            className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+            className="group flex-1 flex items-center justify-center space-x-2 py-2 px-4 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            <RefreshCcw className="w-4 h-4" />
+            <RefreshCcw className="w-4 h-4 group-hover:animate-spin" />
             <span className="text-sm font-medium">Regenerate</span>
           </button>
           <button
             onClick={handleCopyText}
-            className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+            className="group flex-1 flex items-center justify-center space-x-2 py-2 px-4 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            <Copy className="w-4 h-4" />
+            <Copy className="w-4 h-4 group-hover:animate-bounce" />
             <span className="text-sm font-medium">
               {copied ? 'Copied!' : 'Copy Text'}
             </span>
@@ -160,9 +184,9 @@ const StepResult: React.FC = () => {
         {/* Download PDF button */}
         <button
           onClick={handleDownloadPDF}
-          className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-4 h-4 group-hover:animate-bounce" />
           <span className="font-medium">Download PDF</span>
         </button>
 

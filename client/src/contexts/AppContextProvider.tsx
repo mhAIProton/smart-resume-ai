@@ -26,6 +26,7 @@ export interface AppContextType {
     // Auth state
     isAuthenticated: boolean;
     user: User | null;
+    oauthError: boolean;
     
     // Job description state
     jobDescription: JobDescription | null;
@@ -57,6 +58,7 @@ export interface AppContextType {
     
     // Actions
     setUser: (user: User | null) => void;
+    setOauthError: (error: boolean) => void;
     setJobDescription: (jobDescription: JobDescription | null) => void;
     setGenerationType: (type: 'resume' | 'cover-letter' | null) => void;
     setSelectedTone: (tone: 'formal' | 'friendly' | 'bold' | null) => void;
@@ -81,6 +83,7 @@ export interface AppContextType {
 export const AppContext = createContext<AppContextType>({
     isAuthenticated: false,
     user: null,
+    oauthError: false,
     jobDescription: null,
     generationType: null,
     selectedTone: null,
@@ -93,6 +96,7 @@ export const AppContext = createContext<AppContextType>({
     showLoader: false,
     messagePopupData: null,
     setUser: () => {},
+    setOauthError: () => {},
     setJobDescription: () => {},
     setGenerationType: () => {},
     setSelectedTone: () => {},
@@ -121,6 +125,7 @@ const STORAGE_KEYS = {
 export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUserState] = useState<User | null>(null);
+    const [oauthError, setOauthError] = useState(false);
     const [jobDescription, setJobDescriptionState] = useState<JobDescription | null>(null);
     const [generationType, setGenerationTypeState] = useState<'resume' | 'cover-letter' | null>(null);
     const [selectedTone, setSelectedToneState] = useState<'formal' | 'friendly' | 'bold' | null>(null);
@@ -228,6 +233,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     const login = (user: User) => {
         setUser(user);
         setShowAuthModal(false);
+        setOauthError(false);
     };
 
     const logout = () => {
@@ -293,6 +299,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
             value={{
                 isAuthenticated,
                 user,
+                oauthError,
                 jobDescription,
                 generationType,
                 selectedTone,
@@ -305,6 +312,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 showLoader,
                 messagePopupData,
                 setUser,
+                setOauthError,
                 setJobDescription,
                 setGenerationType,
                 setSelectedTone,

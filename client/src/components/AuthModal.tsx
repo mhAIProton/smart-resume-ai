@@ -1,9 +1,8 @@
 import React from 'react';
 import { useAppContext } from "@/contexts/AppContextProvider";
-import { X, Mail } from 'lucide-react';
 
 const AuthModal: React.FC = () => {
-  const { showAuthModal, setShowAuthModal } = useAppContext();
+  const { showAuthModal, setShowAuthModal, oauthError, setOauthError } = useAppContext();
 
   const handleGoogleAuth = () => {
     // Перенаправляем на Google OAuth
@@ -13,6 +12,7 @@ const AuthModal: React.FC = () => {
 
   const handleClose = () => {
     setShowAuthModal(false);
+    setOauthError(false);
   }
 
   if (!showAuthModal) return null
@@ -43,8 +43,14 @@ const AuthModal: React.FC = () => {
           <span>Continue with Google</span>
         </button>
 
+        {oauthError && (
+          <div className="mt-3 text-sm text-red-600 text-center">
+            Google sign-in failed. Try again
+          </div>
+        )}
+
         <div className="pt-4 pb-8 text-xs text-gray-500 text-center">
-          Secure login. We’ll never post anything.
+          Secure login. We'll never post anything.
         </div>
       </div>
     </div>

@@ -67,3 +67,36 @@ db-psql-%:
 
 env:
 	docker exec smart-resume-ai-api env
+
+# Development commands
+dev-db-up:
+	docker-compose -f docker-compose.dev.yml up -d
+
+dev-db-down:
+	docker-compose -f docker-compose.dev.yml down
+
+dev-db-logs:
+	docker-compose -f docker-compose.dev.yml logs -f
+
+dev-db-shell:
+	docker exec -it smart-resume-ai-pg-dev sh
+
+dev-db-psql:
+	docker exec -it smart-resume-ai-pg-dev psql -U postgres -d smart_resume_ai
+
+dev-install:
+	npm install
+
+dev-start:
+	npm run start:dev
+
+dev-setup: dev-install dev-db-up
+	@echo "Development environment setup complete!"
+	@echo "Run 'make dev-start' to start the API server"
+	@echo "Run 'make dev-db-down' to stop the database"
+
+dev-clean:
+	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
+
+dev-sync:
+	npx typeorm-ts-node-commonjs schema:sync -d src/database/data-source.ts
