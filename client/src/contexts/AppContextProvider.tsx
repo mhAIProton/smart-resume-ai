@@ -1,11 +1,14 @@
 import React, { useState, ReactNode, createContext, useContext, useEffect } from 'react';
+import { STORAGE_KEYS, saveToStorage, loadFromStorage, removeFromStorage } from '../utils/chromeStorage';
 
 export interface User {
     id?: string;
     email?: string;
     name?: string;
-    plan: 'Free' | 'Pro' | 'Premium';
+    plan: 'free' | 'pro' | 'pro_plus';
     remainingGenerations: number;
+    totalGenerations: number;
+    subscriptionStatus: 'active' | 'canceling' | 'canceled';
 }
 
 export interface JobDescription {
@@ -59,11 +62,11 @@ export interface AppContextType {
     // Actions
     setUser: (user: User | null) => void;
     setOauthError: (error: boolean) => void;
-    setJobDescription: (jobDescription: JobDescription | null) => void;
-    setGenerationType: (type: 'resume' | 'cover-letter' | null) => void;
-    setSelectedTone: (tone: 'formal' | 'friendly' | 'bold' | null) => void;
-    setResumeData: (data: ResumeData | null) => void;
-    setSelectedDesign: (design: 'classic' | 'modern' | 'minimal' | null) => void;
+    setJobDescription: (jobDescription: JobDescription | null) => Promise<void>;
+    setGenerationType: (type: 'resume' | 'cover-letter' | null) => Promise<void>;
+    setSelectedTone: (tone: 'formal' | 'friendly' | 'bold' | null) => Promise<void>;
+    setResumeData: (data: ResumeData | null) => Promise<void>;
+    setSelectedDesign: (design: 'classic' | 'modern' | 'minimal' | null) => Promise<void>;
     setLoading: (loading: boolean) => void;
     setShowAuthModal: (show: boolean) => void;
     setShowSubscriptionsPopup: (show: boolean) => void;
@@ -75,9 +78,9 @@ export interface AppContextType {
         subtitle: string;
         buttonText?: string;
     } | null) => void;
-    login: (user: User) => void;
-    logout: () => void;
-    clearFormData: () => void; // Новая функция для очистки данных форм
+    login: (user: User) => Promise<void>;
+    logout: () => Promise<void>;
+    clearFormData: () => Promise<void>; // Новая функция для очистки данных форм
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -97,30 +100,23 @@ export const AppContext = createContext<AppContextType>({
     messagePopupData: null,
     setUser: () => {},
     setOauthError: () => {},
-    setJobDescription: () => {},
-    setGenerationType: () => {},
-    setSelectedTone: () => {},
-    setResumeData: () => {},
-    setSelectedDesign: () => {},
+    setJobDescription: async () => {},
+    setGenerationType: async () => {},
+    setSelectedTone: async () => {},
+    setResumeData: async () => {},
+    setSelectedDesign: async () => {},
     setLoading: () => {},
     setShowAuthModal: () => {},
     setShowSubscriptionsPopup: () => {},
     setShowMessagePopup: () => {},
     setShowLoader: () => {},
     setMessagePopupData: () => {},
-    login: () => {},
-    logout: () => {},
-    clearFormData: () => {},
+    login: async () => {},
+    logout: async () => {},
+    clearFormData: async () => {},
 });
 
-// Ключи для localStorage
-const STORAGE_KEYS = {
-    JOB_DESCRIPTION: 'smart_resume_job_description',
-    GENERATION_TYPE: 'smart_resume_generation_type',
-    SELECTED_TONE: 'smart_resume_selected_tone',
-    RESUME_DATA: 'smart_resume_resume_data',
-    SELECTED_DESIGN: 'smart_resume_selected_design',
-};
+// Storage keys are now imported from chromeStorage utility
 
 export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -143,58 +139,41 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         buttonText?: string;
     } | null>(null);
 
-    // Функции для работы с localStorage
-    const saveToStorage = (key: string, data: any) => {
-        try {
-            localStorage.setItem(key, JSON.stringify(data));
-        } catch (error) {
-            console.error('Error saving to localStorage:', error);
-        }
-    };
-
-    const loadFromStorage = (key: string) => {
-        try {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : null;
-        } catch (error) {
-            console.error('Error loading from localStorage:', error);
-            return null;
-        }
-    };
+    // Storage functions are now imported from chromeStorage utility
 
     const setUser = (user: User | null) => {
         setUserState(user);
         setIsAuthenticated(!!user);
     };
 
-    const setJobDescription = (jobDescription: JobDescription | null) => {
+    const setJobDescription = async (jobDescription: JobDescription | null) => {
         setJobDescriptionState(jobDescription);
         if (jobDescription) {
-            saveToStorage(STORAGE_KEYS.JOB_DESCRIPTION, jobDescription);
+            await saveToStorage(STORAGE_KEYS.JOB_DESCRIPTION, jobDescription);
         } else {
-            localStorage.removeItem(STORAGE_KEYS.JOB_DESCRIPTION);
+            await removeFromStorage(STORAGE_KEYS.JOB_DESCRIPTION);
         }
     };
 
-    const setGenerationType = (type: 'resume' | 'cover-letter' | null) => {
+    const setGenerationType = async (type: 'resume' | 'cover-letter' | null) => {
         setGenerationTypeState(type);
         if (type) {
-            saveToStorage(STORAGE_KEYS.GENERATION_TYPE, type);
+            await saveToStorage(STORAGE_KEYS.GENERATION_TYPE, type);
         } else {
-            localStorage.removeItem(STORAGE_KEYS.GENERATION_TYPE);
+            await removeFromStorage(STORAGE_KEYS.GENERATION_TYPE);
         }
     };
 
-    const setSelectedTone = (tone: 'formal' | 'friendly' | 'bold' | null) => {
+    const setSelectedTone = async (tone: 'formal' | 'friendly' | 'bold' | null) => {
         setSelectedToneState(tone);
         if (tone) {
-            saveToStorage(STORAGE_KEYS.SELECTED_TONE, tone);
+            await saveToStorage(STORAGE_KEYS.SELECTED_TONE, tone);
         } else {
-            localStorage.removeItem(STORAGE_KEYS.SELECTED_TONE);
+            await removeFromStorage(STORAGE_KEYS.SELECTED_TONE);
         }
     };
 
-    const setResumeData = (data: ResumeData | null) => {
+    const setResumeData = async (data: ResumeData | null) => {
         setResumeDataState(data);
         if (data) {
             // Сохраняем данные без File объекта (он не сериализуется)
@@ -202,96 +181,131 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 ...data,
                 uploadedFile: undefined, // Убираем File объект
             };
-            saveToStorage(STORAGE_KEYS.RESUME_DATA, dataToSave);
+            await saveToStorage(STORAGE_KEYS.RESUME_DATA, dataToSave);
         } else {
-            localStorage.removeItem(STORAGE_KEYS.RESUME_DATA);
+            await removeFromStorage(STORAGE_KEYS.RESUME_DATA);
         }
     };
 
-    const setSelectedDesign = (design: 'classic' | 'modern' | 'minimal' | null) => {
+    const setSelectedDesign = async (design: 'classic' | 'modern' | 'minimal' | null) => {
         setSelectedDesignState(design);
         if (design) {
-            saveToStorage(STORAGE_KEYS.SELECTED_DESIGN, design);
+            await saveToStorage(STORAGE_KEYS.SELECTED_DESIGN, design);
         } else {
-            localStorage.removeItem(STORAGE_KEYS.SELECTED_DESIGN);
+            await removeFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
         }
     };
 
-    const clearFormData = () => {
+    const clearFormData = async () => {
         setJobDescription(null);
         setGenerationType(null);
         setSelectedTone(null);
         setResumeData(null);
         setSelectedDesign(null);
         
-        // Очищаем localStorage
-        Object.values(STORAGE_KEYS).forEach(key => {
-            localStorage.removeItem(key);
-        });
+        // Очищаем storage
+        const keysToRemove = [
+            STORAGE_KEYS.JOB_DESCRIPTION,
+            STORAGE_KEYS.GENERATION_TYPE,
+            STORAGE_KEYS.SELECTED_TONE,
+            STORAGE_KEYS.RESUME_DATA,
+            STORAGE_KEYS.SELECTED_DESIGN
+        ];
+        await removeFromStorage(keysToRemove);
     };
 
-    const login = (user: User) => {
+    const login = async (user: User) => {
         setUser(user);
         setShowAuthModal(false);
         setOauthError(false);
+        // Сохраняем данные пользователя в storage
+        await saveToStorage(STORAGE_KEYS.USER_DATA, user);
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
-        clearFormData();
-        localStorage.removeItem('auth_token');
+        await clearFormData();
+        await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+        await removeFromStorage(STORAGE_KEYS.USER_DATA);
     };
 
     // Функция для проверки авторизации при загрузке приложения
     const checkAuth = async () => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (response.ok) {
-                    const userData = await response.json();
-                    setUser({
-                        id: userData.id,
-                        email: userData.email,
-                        name: userData.name,
-                        plan: userData.plan,
-                        remainingGenerations: userData.remainingGenerations,
-                    });
-                } else {
-                    // Токен недействителен, удаляем его
-                    localStorage.removeItem('auth_token');
-                }
-            } catch (error) {
-                console.error('Error checking auth:', error);
-                localStorage.removeItem('auth_token');
+        try {
+            // Сначала проверяем, есть ли сохраненные данные пользователя
+            const savedUserData = await loadFromStorage(STORAGE_KEYS.USER_DATA);
+            if (savedUserData) {
+                setUser(savedUserData);
+                setIsAuthenticated(true);
+                return;
             }
+
+            // Если нет сохраненных данных, проверяем токен
+            const token = await loadFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+            if (token) {
+                try {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        const user = {
+                            id: userData.id,
+                            email: userData.email,
+                            name: userData.name,
+                            plan: userData.plan,
+                            remainingGenerations: userData.remainingGenerations,
+                            totalGenerations: userData.totalGenerations,
+                            subscriptionStatus: userData.subscriptionStatus,
+                        };
+                        setUser(user);
+                        setIsAuthenticated(true);
+                        // Сохраняем данные пользователя
+                        await saveToStorage(STORAGE_KEYS.USER_DATA, user);
+                    } else {
+                        // Токен недействителен, удаляем его
+                        await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+                    }
+                } catch (error) {
+                    console.error('Error checking auth:', error);
+                    await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading user data from storage:', error);
         }
     };
 
     // Загружаем сохраненные данные форм при инициализации
-    const loadFormData = () => {
-        const savedJobDescription = loadFromStorage(STORAGE_KEYS.JOB_DESCRIPTION);
-        const savedGenerationType = loadFromStorage(STORAGE_KEYS.GENERATION_TYPE);
-        const savedSelectedTone = loadFromStorage(STORAGE_KEYS.SELECTED_TONE);
-        const savedResumeData = loadFromStorage(STORAGE_KEYS.RESUME_DATA);
-        const savedSelectedDesign = loadFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
+    const loadFormData = async () => {
+        try {
+            const savedJobDescription = await loadFromStorage(STORAGE_KEYS.JOB_DESCRIPTION);
+            const savedGenerationType = await loadFromStorage(STORAGE_KEYS.GENERATION_TYPE);
+            const savedSelectedTone = await loadFromStorage(STORAGE_KEYS.SELECTED_TONE);
+            const savedResumeData = await loadFromStorage(STORAGE_KEYS.RESUME_DATA);
+            const savedSelectedDesign = await loadFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
 
-        if (savedJobDescription) setJobDescriptionState(savedJobDescription);
-        if (savedGenerationType) setGenerationTypeState(savedGenerationType);
-        if (savedSelectedTone) setSelectedToneState(savedSelectedTone);
-        if (savedResumeData) setResumeDataState(savedResumeData);
-        if (savedSelectedDesign) setSelectedDesignState(savedSelectedDesign);
+            if (savedJobDescription) setJobDescriptionState(savedJobDescription);
+            if (savedGenerationType) setGenerationTypeState(savedGenerationType);
+            if (savedSelectedTone) setSelectedToneState(savedSelectedTone);
+            if (savedResumeData) setResumeDataState(savedResumeData);
+            if (savedSelectedDesign) setSelectedDesignState(savedSelectedDesign);
+        } catch (error) {
+            console.error('Error loading form data from storage:', error);
+        }
     };
 
     // Проверяем авторизацию и загружаем данные форм при загрузке приложения
     useEffect(() => {
-        checkAuth();
-        loadFormData();
+        const initializeApp = async () => {
+            await checkAuth();
+            await loadFormData();
+        };
+        
+        initializeApp();
     }, []);
 
     return (

@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { loadFromStorage, removeFromStorage, STORAGE_KEYS } from '../utils/chromeStorage';
 
 // Типы для API
 export interface ApiResponse<T = any> {
@@ -47,7 +48,7 @@ class ApiService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
     
     this.api = axios.create({
       baseURL: this.baseURL,
@@ -59,8 +60,8 @@ class ApiService {
 
     // Добавляем токен авторизации к каждому запросу
     this.api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('auth_token');
+      async (config) => {
+        const token = await loadFromStorage(STORAGE_KEYS.AUTH_TOKEN);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -74,11 +75,15 @@ class ApiService {
     // Обрабатываем ошибки авторизации
     this.api.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         if (error.response?.status === 401) {
           // Токен недействителен, удаляем его
-          localStorage.removeItem('auth_token');
-          window.location.href = '/';
+          await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+          await removeFromStorage(STORAGE_KEYS.USER_DATA);
+          // В Chrome расширении не нужно перенаправлять, просто очищаем состояние
+          if (typeof window !== 'undefined' && window.location) {
+            window.location.href = '/';
+          }
         }
         return Promise.reject(error);
       }
@@ -87,39 +92,40 @@ class ApiService {
 
   // Методы авторизации
   async getProfile(): Promise<UserProfile> {
-    const response = await this.api.get<ApiResponse<UserProfile>>('/auth/me');
-    return response.data.data;
+    const response = await this.api.get<UserProfile>('/auth/me');
+    return response.data;
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    const response = await this.api.post<ApiResponse<AuthResponse>>('/auth/refresh');
-    return response.data.data;
+    const response = await this.api.post<AuthResponse>('/auth/refresh');
+    return response.data;
   }
 
   async logout(): Promise<void> {
     await this.api.post('/auth/logout');
-    localStorage.removeItem('auth_token');
+    await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
+    await removeFromStorage(STORAGE_KEYS.USER_DATA);
   }
 
   // Методы для работы с генерацией контента
   async generateContent(request: GenerationRequest): Promise<GenerationResponse> {
-    const response = await this.api.post<ApiResponse<GenerationResponse>>('/generations', request);
-    return response.data.data;
+    const response = await this.api.post<GenerationResponse>('/generations', request);
+    return response.data;
   }
 
   async getGenerations(): Promise<GenerationResponse[]> {
-    const response = await this.api.get<ApiResponse<GenerationResponse[]>>('/generations');
-    return response.data.data;
+    const response = await this.api.get<GenerationResponse[]>('/generations');
+    return response.data;
   }
 
   async getGeneration(id: string): Promise<GenerationResponse> {
-    const response = await this.api.get<ApiResponse<GenerationResponse>>(`/generations/${id}`);
-    return response.data.data;
+    const response = await this.api.get<GenerationResponse>(`/generations/${id}`);
+    return response.data;
   }
 
   async regenerateGeneration(id: string): Promise<GenerationResponse> {
-    const response = await this.api.post<ApiResponse<GenerationResponse>>(`/generations/${id}/regenerate`);
-    return response.data.data;
+    const response = await this.api.post<GenerationResponse>(`/generations/${id}/regenerate`);
+    return response.data;
   }
 
   async deleteGeneration(id: string): Promise<void> {
@@ -133,7 +139,7 @@ class ApiService {
     existingResume?: string;
     design?: 'classic' | 'modern' | 'minimal';
   }): Promise<string> {
-    const response = await this.api.post<ApiResponse<{ content: string }>>('/openai/generate-resume', request);
+    const response = await this.api.post<{ content: string }>('/openai/generate-resume', request);
     return String(response.data.content);
   }
 
@@ -141,18 +147,18 @@ class ApiService {
     jobDescription: string;
     tone?: 'formal' | 'friendly' | 'bold';
   }): Promise<string> {
-    const response = await this.api.post<ApiResponse<{ content: string }>>('/openai/generate-cover-letter', request);
+    const response = await this.api.post<{ content: string }>('/openai/generate-cover-letter', request);
     return String(response.data.content);
   }
 
   async extractJobDescription(url: string): Promise<{ content: string }> {
-    const response = await this.api.post<ApiResponse<{ content: string }>>('/openai/extract-job-description', { url });
-    return response.data.data;
+    const response = await this.api.post<{ content: string }>('/openai/extract-job-description', { url });
+    return response.data;
   }
 
   async improveContent(content: string, type: 'resume' | 'cover_letter'): Promise<{ content: string }> {
-    const response = await this.api.post<ApiResponse<{ content: string }>>('/openai/improve-content', { content, type });
-    return response.data.data;
+    const response = await this.api.post<{ content: string }>('/openai/improve-content', { content, type });
+    return response.data;
   }
 
   // Метод для загрузки файлов
@@ -160,7 +166,7 @@ class ApiService {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await this.api.post<ApiResponse<{ content: string }>>('/openai/upload-file', formData, {
+    const response = await this.api.post<{ content: string }>('/openai/upload-file', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -186,6 +192,16 @@ class ApiService {
     }
     
     throw new Error('Generation timeout');
+  }
+
+  // Методы для работы с Stripe
+  async createCheckoutSession(priceId: string): Promise<{ sessionId: string; url: string }> {
+    const response = await this.api.post<{ sessionId: string; url: string }>('/stripe/create-checkout-session', {
+      priceId,
+      successUrl: `${this.baseURL}/stripe/subscription-success`,
+      cancelUrl: `${this.baseURL}/stripe/subscription-cancel`,
+    });
+    return response.data;
   }
 }
 

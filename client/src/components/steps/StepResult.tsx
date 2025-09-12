@@ -3,6 +3,7 @@ import {Copy, Download, RefreshCcw} from 'lucide-react';
 import { useAppContext, User } from '@/contexts/AppContextProvider';
 import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
+import jsPDF from 'jspdf';
 
 const StepResult: React.FC = () => {
   const { 
@@ -15,7 +16,9 @@ const StepResult: React.FC = () => {
     resumeData,
     selectedDesign,
     user,
-    setUser
+    setUser,
+    setShowMessagePopup,
+    setMessagePopupData
   } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
@@ -25,16 +28,23 @@ const StepResult: React.FC = () => {
 
   // Проверяем авторизацию при загрузке компонента
   useEffect(() => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      generateContent();
-    }
+    setShowAuthModal(!isAuthenticated);
+    generateContent();
   }, [isAuthenticated, setShowAuthModal]);
 
   // Функция для генерации контента
   const generateContent = async () => {
     if (!isAuthenticated || !jobDescription || !generationType) {
+      return;
+    }
+
+    if (Number(user?.remainingGenerations) < 1) {
+      setMessagePopupData({
+        type: 'error',
+        title: 'Insufficient generations remaining',
+        subtitle: 'Please upgrade your plan to generate more content.',
+      });
+      setShowMessagePopup(true);
       return;
     }
 
@@ -77,7 +87,7 @@ const StepResult: React.FC = () => {
 
   // Получаем сгенерированный контент
   const getGeneratedContent = () => {
-    return generatedContent || 'Generating content...';
+    return generatedContent || 'Your draft will appear here...';
   };
 
   const handleCopyText = async () => {
@@ -92,13 +102,85 @@ const StepResult: React.FC = () => {
   };
 
   const handleRegenerate = async () => {
-    toast.success('Regenerating content...');
     await generateContent();
   };
 
   const handleDownloadPDF = () => {
-    toast.success('Downloading PDF...');
-    // Здесь будет логика скачивания PDF
+    try {
+      const content = getGeneratedContent();
+      
+      if (!content || content === 'Your draft will appear here...') {
+        toast.error('No content to download');
+        return;
+      }
+
+      // Создаем новый PDF документ
+      const pdf = new jsPDF();
+      
+      // Настройки шрифта и размера
+      const fontSize = 10;
+      const lineHeight = fontSize * 0.4;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+      
+      // Разбиваем текст на строки
+      const lines = pdf.splitTextToSize(content, maxWidth);
+      
+      let yPosition = margin;
+      let currentPage = 1;
+      
+      // Добавляем заголовок
+      const title = generationType === 'resume' ? 'Resume' : 'Cover Letter';
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(title, margin, yPosition);
+      yPosition += 15;
+      
+      // Добавляем дату
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      const currentDate = new Date().toLocaleDateString();
+      pdf.text(`Generated on: ${currentDate}`, margin, yPosition);
+      yPosition += 10;
+      
+      // Добавляем разделительную линию
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+      
+      // Добавляем основной контент
+      pdf.setFontSize(fontSize);
+      pdf.setFont('helvetica', 'normal');
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Проверяем, помещается ли строка на текущей странице
+        if (yPosition + lineHeight > pageHeight - margin) {
+          pdf.addPage();
+          currentPage++;
+          yPosition = margin;
+        }
+        
+        // Добавляем строку
+        pdf.text(line, margin, yPosition);
+        yPosition += lineHeight;
+      }
+      
+      // Генерируем имя файла
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileName = `${generationType === 'resume' ? 'resume' : 'cover-letter'}_${timestamp}.pdf`;
+      
+      // Скачиваем PDF
+      pdf.save(fileName);
+      
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
   const handleStartNew = () => {
@@ -174,7 +256,7 @@ const StepResult: React.FC = () => {
             onClick={handleCopyText}
             className="group flex-1 flex items-center justify-center space-x-2 py-2 px-4 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            <Copy className="w-4 h-4 group-hover:animate-bounce" />
+            <Copy className="w-4 h-4 group-hover:animate-pulse" />
             <span className="text-sm font-medium">
               {copied ? 'Copied!' : 'Copy Text'}
             </span>
@@ -186,7 +268,7 @@ const StepResult: React.FC = () => {
           onClick={handleDownloadPDF}
           className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
-          <Download className="w-4 h-4 group-hover:animate-bounce" />
+          <Download className="w-4 h-4 group-hover:animate-pulse" />
           <span className="font-medium">Download PDF</span>
         </button>
 

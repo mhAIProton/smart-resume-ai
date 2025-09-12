@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
+import {useNavigation} from '@/contexts/NavigationContext';
 
 /**
  * Главный компонент (шаг 1), описание работы
  * @constructor
  */
 const StepMain: React.FC = () => {
-    const navigate = useNavigate();
+    const {navigate} = useNavigation();
     const {jobDescription, setJobDescription, user} = useAppContext();
     const [jobText, setJobText] = useState('');
     const [showExample, setShowExample] = useState(false);
@@ -21,10 +21,10 @@ const StepMain: React.FC = () => {
         }
     }, [jobDescription]);
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (isValid()) {
-            setJobDescription({text: jobText.trim(), source: 'manual'});
-            navigate('/type');
+            await setJobDescription({text: jobText.trim(), source: 'manual'});
+            navigate('type');
         }
     }
 

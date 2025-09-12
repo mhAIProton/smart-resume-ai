@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
+import {useNavigation} from '@/contexts/NavigationContext';
 
 interface ToneOption {
     value: 'formal' | 'friendly' | 'bold';
@@ -10,7 +10,7 @@ interface ToneOption {
 }
 
 const StepTone: React.FC = () => {
-    const navigate = useNavigate();
+    const {navigate} = useNavigation();
     const {selectedTone: contextTone, setSelectedTone} = useAppContext();
     const [selectedTone, setSelectedToneLocal] = useState<'formal' | 'friendly' | 'bold' | null>(contextTone);
 
@@ -35,14 +35,14 @@ const StepTone: React.FC = () => {
         }
     ];
 
-    const handleToneChange = (tone: 'formal' | 'friendly' | 'bold') => {
+    const handleToneChange = async (tone: 'formal' | 'friendly' | 'bold') => {
         setSelectedToneLocal(tone);
-        setSelectedTone(tone);
+        await setSelectedTone(tone);
     };
 
     const handleContinue = () => {
         if (selectedTone) {
-            navigate('/result');
+            navigate('result');
         }
     };
 

@@ -15,6 +15,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'smart_resume_ai',
   entities: [User, Order, Generation],
-  synchronize: true,
+  migrations: ['src/migrations/*.ts'],
+  synchronize: false,
   logging: true,
 });

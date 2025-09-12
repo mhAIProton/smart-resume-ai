@@ -29,13 +29,83 @@ export class AuthController {
       
       const result = await this.authService.googleLogin(req.user);
       
-      // Redirect to frontend with token
-      const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${result.access_token}`;
+      // Always redirect with token in URL for simplicity
+      const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/callback?token=${result.access_token}`;
       res.redirect(redirectUrl);
     } catch (error) {
       console.error('❌ Google OAuth callback error:', error);
-      const errorUrl = `${process.env.FRONTEND_URL}/auth/callback?error=oauth_error`;
+      const errorUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/callback?error=oauth_error`;
       res.redirect(errorUrl);
+    }
+  }
+
+  @Post('google/token')
+  @ApiOperation({ summary: 'Exchange Google OAuth code for token' })
+  async googleTokenExchange(@Req() req: Request) {
+    try {
+      const { code, redirectUri } = req.body;
+      
+      if (!code || !redirectUri) {
+        throw new Error('Missing code or redirectUri');
+      }
+      
+      console.log('🔐 Google token exchange request');
+      console.log('  Code:', code ? 'present' : 'missing');
+      console.log('  Redirect URI:', redirectUri);
+      
+      // Exchange code for token using Google OAuth2
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUri,
+        }),
+      });
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to exchange code for token');
+      }
+      
+      const tokenData = await tokenResponse.json();
+      const { access_token } = tokenData;
+      
+      // Get user info from Google
+      const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to get user info');
+      }
+      
+      const googleUser = await userResponse.json();
+      
+      // Create or find user in our database
+      const result = await this.authService.googleLogin({
+        id: googleUser.id,
+        email: googleUser.email,
+        name: googleUser.name,
+        avatar: googleUser.picture,
+      });
+      
+      return {
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          name: result.user.name,
+          plan: result.user.plan,
+          remainingGenerations: result.user.remainingGenerations,
+          totalGenerations: (result.user as any).totalGenerations || 0,
+          subscriptionStatus: (result.user as any).subscriptionStatus || 'active',
+        },
+        token: result.access_token,
+      };
+    } catch (error) {
+      console.error('❌ Google token exchange error:', error);
+      throw error;
     }
   }
 
@@ -58,8 +128,8 @@ export class AuthController {
       id: user.id,
       email: user.email,
       name: user.name,
-      avatar: user.avatar,
       plan: user.plan,
+      subscriptionStatus: user.subscriptionStatus,
       remainingGenerations: user.remainingGenerations,
       totalGenerations: user.totalGenerations,
       createdAt: user.createdAt,

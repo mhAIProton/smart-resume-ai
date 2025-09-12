@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react'
-import {useNavigate} from 'react-router-dom'
 import {useAppContext} from '@/contexts/AppContextProvider'
+import {useNavigation} from '@/contexts/NavigationContext'
 import { useUploadFile } from '@/hooks/useApi'
 import toast from 'react-hot-toast'
 
 const StepResume: React.FC = () => {
-    const navigate = useNavigate()
+    const {navigate} = useNavigation()
     const {resumeData, setResumeData} = useAppContext()
     const [selectedOption, setSelectedOption] = useState<'generate' | 'improve' | null>(null)
     const [generateText, setGenerateText] = useState('')
@@ -36,25 +36,25 @@ const StepResume: React.FC = () => {
         }
     }, [resumeData])
 
-    const handleGenerateContinue = () => {
+    const handleGenerateContinue = async () => {
         if (selectedOption === 'generate' && generateText.trim()) {
-            setResumeData({
+            await setResumeData({
                 option: 'generate',
                 generateText: generateText.trim()
             });
-            navigate('/design');
+            navigate('design');
         }
     }
 
-    const handleImproveContinue = () => {
+    const handleImproveContinue = async () => {
         if (selectedOption === 'improve' && (improveText.trim() || uploadedFile)) {
-            setResumeData({
+            await setResumeData({
                 option: 'improve',
                 improveText: improveText.trim(),
                 uploadedFile: uploadedFile || undefined,
                 uploadedFileName: uploadedFile?.name
             });
-            navigate('/design');
+            navigate('design');
         }
     }
 

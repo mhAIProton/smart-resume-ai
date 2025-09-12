@@ -4,19 +4,32 @@
   "version": "1.0.0",
   "description": "AI-powered resume and cover letter generator",
   "permissions": [
+    "http://localhost:3000/*",
+    "https://smartresume-ai.com/*",
     "activeTab",
     "storage",
     "identity",
     "tabs",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
+    "http://localhost:3000/*",
+    "https://smartresume-ai.com/*",
+    "https://*.smartresume-ai.com/*",
     "https://*.google.com/*",
     "https://*.stripe.com/*",
-    "https://api.smartresumeai.com/*"
+    "https://*.linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://*.glassdoor.com/*",
+    "https://*.monster.com/*",
+    "https://*.ziprecruiter.com/*",
+    "https://*.careerbuilder.com/*",
+    "https://*.dice.com/*",
+    "https://*.angel.co/*"
   ],
   "oauth2": {
-    "client_id": "YOUR_GOOGLE_CLIENT_ID",
+    "client_id": "1042963792345-mlb3jmbungsmno1vensbne979rdi7mjn.apps.googleusercontent.com",
     "scopes": [
       "openid",
       "email",
@@ -46,18 +59,31 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "https://*.linkedin.com/jobs/*",
+        "https://*.indeed.com/viewjob*",
+        "https://*.glassdoor.com/job-listing/*",
+        "https://*.monster.com/jobs/*",
+        "https://*.ziprecruiter.com/jobs/*",
+        "https://*.careerbuilder.com/job/*",
+        "https://*.dice.com/jobs/*",
+        "https://*.angel.co/jobs/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*"],
+      "resources": [
+        "assets/*",
+        "*.svg",
+        "*.png"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
   "externally_connectable": {
-    "matches": ["https://*.smartresumeai.com/*"]
+    "matches": ["https://*.smartresume-ai.com/*"]
   }
 }

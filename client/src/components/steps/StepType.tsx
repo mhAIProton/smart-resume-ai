@@ -1,24 +1,24 @@
 import React, {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
+import {useNavigation} from '@/contexts/NavigationContext';
 
 /**
  * Выбор типа генерации (шаг 2), резюме или сопроводительное письмо
  * @constructor
  */
 const StepType: React.FC = () => {
-    const navigate = useNavigate();
+    const {navigate} = useNavigation();
     const {jobDescription, generationType, setGenerationType} = useAppContext();
     const [selectedType, setSelectedType] = useState<'resume' | 'cover-letter' | null>(generationType);
 
-    const handleTypeChange = (type: 'resume' | 'cover-letter') => {
+    const handleTypeChange = async (type: 'resume' | 'cover-letter') => {
         setSelectedType(type);
-        setGenerationType(type);
+        await setGenerationType(type);
     }
 
     const handleContinue = () => {
         if (jobDescription) {
-            navigate(selectedType === 'resume' ? '/resume' : '/tone');
+            navigate(selectedType === 'resume' ? 'resume' : 'tone');
         }
     }
 

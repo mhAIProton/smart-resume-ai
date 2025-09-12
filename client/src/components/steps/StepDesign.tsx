@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '@/contexts/AppContextProvider';
+import {useNavigation} from '@/contexts/NavigationContext';
 
 interface DesignOption {
     value: 'classic' | 'modern' | 'minimal';
@@ -10,7 +10,7 @@ interface DesignOption {
 }
 
 const StepDesign: React.FC = () => {
-    const navigate = useNavigate();
+    const {navigate} = useNavigation();
     const {selectedDesign: contextDesign, setSelectedDesign} = useAppContext();
     const [selectedDesign, setSelectedDesignLocal] = useState<'classic' | 'modern' | 'minimal' | null>(null);
 
@@ -42,14 +42,14 @@ const StepDesign: React.FC = () => {
         }
     }, [contextDesign]);
 
-    const handleDesignChange = (design: 'classic' | 'modern' | 'minimal') => {
+    const handleDesignChange = async (design: 'classic' | 'modern' | 'minimal') => {
         setSelectedDesignLocal(design);
-        setSelectedDesign(design);
+        await setSelectedDesign(design);
     };
 
     const handleContinue = () => {
         if (selectedDesign) {
-            navigate('/result');
+            navigate('result');
         }
     };
 

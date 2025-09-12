@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserPlan } from './entities/user.entity';
+import { User, UserPlan, SubscriptionStatus } from './entities/user.entity';
 
 export interface CreateUserDto {
   email: string;
@@ -29,7 +29,9 @@ export class UsersService {
     const user = this.usersRepository.create({
       ...createUserDto,
       plan: createUserDto.plan || UserPlan.FREE,
-      remainingGenerations: createUserDto.plan === UserPlan.FREE ? 3 : 0,
+      remainingGenerations: 3,
+      totalGenerations: 3,
+      subscriptionStatus: SubscriptionStatus.ACTIVE,
     });
 
     return this.usersRepository.save(user);
@@ -37,7 +39,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
-      select: ['id', 'email', 'name', 'avatar', 'plan', 'remainingGenerations', 'createdAt'],
+      select: ['id', 'email', 'name', 'avatar', 'plan', 'remainingGenerations', 'subscriptionStatus', 'createdAt'],
     });
   }
 
@@ -84,6 +86,24 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  async activateSubscription(id: string, plan: UserPlan): Promise<User> {
+    const user = await this.findOne(id);
+    user.plan = plan;
+    user.subscriptionStatus = SubscriptionStatus.ACTIVE;
+    
+    // Set subscription expiry to 1 month from now
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+    user.subscriptionExpiresAt = expiryDate;
+    
+    // Update generation limits based on plan
+    const planLimits = user.getPlanLimits();
+    user.remainingGenerations = planLimits.generations;
+    user.totalGenerations = planLimits.generations;
+    
+    return this.usersRepository.save(user);
+  }
+
   async addGenerations(id: string, count: number): Promise<User> {
     const user = await this.findOne(id);
     user.addGenerations(count);
@@ -111,15 +131,27 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async deactivateUser(id: string): Promise<User> {
+  async updateSubscriptionStatus(id: string, status: SubscriptionStatus): Promise<User> {
     const user = await this.findOne(id);
-    user.isActive = false;
+    user.subscriptionStatus = status;
     return this.usersRepository.save(user);
   }
 
-  async activateUser(id: string): Promise<User> {
+  async setSubscriptionCanceling(id: string): Promise<User> {
     const user = await this.findOne(id);
-    user.isActive = true;
+    user.subscriptionStatus = SubscriptionStatus.CANCELING;
+    return this.usersRepository.save(user);
+  }
+
+  async setSubscriptionCanceled(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.subscriptionStatus = SubscriptionStatus.CANCELED;
+    return this.usersRepository.save(user);
+  }
+
+  async setSubscriptionActive(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.subscriptionStatus = SubscriptionStatus.ACTIVE;
     return this.usersRepository.save(user);
   }
 }

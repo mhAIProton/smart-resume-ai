@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContextProvider';
+import apiService from '@/services/api';
 
 interface PlanOption {
   value: 'free' | 'pro' | 'pro-plus';
@@ -8,6 +9,7 @@ interface PlanOption {
   description: string;
   details: string;
   isCurrent?: boolean;
+  priceId?: string;
 }
 
 const SubscriptionsPopup: React.FC = () => {
@@ -26,7 +28,7 @@ const SubscriptionsPopup: React.FC = () => {
       value: 'free',
       title: 'Free',
       price: '$ 0',
-      description: '3/3 AI-generations. Current Plan',
+      description: '3 AI-generations',
       details: 'Your limit will reset on June 1.',
       isCurrent: true
     },
@@ -34,15 +36,17 @@ const SubscriptionsPopup: React.FC = () => {
       value: 'pro',
       title: 'Pro Plan',
       price: '$ 10.90',
-      description: '10 AI-generations',
-      details: ''
+      description: '30 AI-generations',
+      details: 'Monthly subscription',
+      priceId: import.meta.env.VITE_STRIPE_PRO_PRICE_ID
     },
     {
       value: 'pro-plus',
       title: 'Pro+ Plan',
       price: '$ 19.90',
-      description: '100 AI-generations',
-      details: ''
+      description: '80 AI-generations',
+      details: 'Monthly subscription',
+      priceId: import.meta.env.VITE_STRIPE_PRO_PLUS_PRICE_ID
     }
   ];
 
@@ -55,26 +59,45 @@ const SubscriptionsPopup: React.FC = () => {
     setSelectedPlan(plan);
   };
 
-  const handleUpgrade = () => {
-    if (selectedPlan) {
-      // Close subscriptions popup
-      setShowSubscriptionsPopup(false);
+  const handleUpgrade = async () => {
+    if (!selectedPlan) return;
+
+    // Close subscriptions popup
+    setShowSubscriptionsPopup(false);
+    
+    // Show message popup based on selected plan
+    if (selectedPlan === 'free') {
+      setMessagePopupData({
+        type: 'error',
+        title: 'You already have a free plan',
+        subtitle: 'Try to purchase a pro plan'
+      });
+      setShowMessagePopup(true);
+      return;
+    }
+
+    try {
+      // Find the selected plan option
+      const selectedPlanOption = planOptions.find(option => option.value === selectedPlan);
       
-      // Show message popup based on selected plan
-      if (selectedPlan === 'free') {
-        setMessagePopupData({
-          type: 'error',
-          title: 'You already have a free plan',
-          subtitle: 'Try to purchase a pro plan'
-        });
-      } else {
-        setMessagePopupData({
-          type: 'message',
-          title: 'Payment success',
-          subtitle: 'Your Plan has been changed to Pro'
-        });
+      if (!selectedPlanOption?.priceId) {
+        throw new Error('Price ID not found for selected plan');
       }
+
+      // Create Stripe checkout session
+      const { url } = await apiService.createCheckoutSession(selectedPlanOption.priceId);
       
+      // Redirect to Stripe checkout
+      window.location.href = url;
+      
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      
+      setMessagePopupData({
+        type: 'error',
+        title: 'Payment Error',
+        subtitle: 'Failed to create checkout session. Please try again.'
+      });
       setShowMessagePopup(true);
     }
   };

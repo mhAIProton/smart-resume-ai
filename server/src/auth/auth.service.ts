@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User, UserPlan } from '../users/entities/user.entity';
+import { User, UserPlan, SubscriptionStatus } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 
 export interface JwtPayload {
@@ -100,8 +100,18 @@ export class AuthService {
   async validateJwtPayload(payload: JwtPayload): Promise<User> {
     const user = await this.usersService.findById(payload.sub);
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid token or user inactive');
+    if (!user) {
+      throw new UnauthorizedException('Invalid token or user not found');
+    }
+
+    return user;
+  }
+
+  async validateJwtPayloadForGeneration(payload: JwtPayload): Promise<User> {
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user || user.subscriptionStatus !== SubscriptionStatus.ACTIVE) {
+      throw new UnauthorizedException('Invalid token or user subscription inactive');
     }
 
     return user;

@@ -16,6 +16,12 @@ export enum UserPlan {
   PRO_PLUS = 'pro_plus',
 }
 
+export enum SubscriptionStatus {
+  ACTIVE = 'active',
+  CANCELING = 'canceling',
+  CANCELED = 'canceled',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -44,7 +50,7 @@ export class User {
   @Column({ default: 3 })
   remainingGenerations: number;
 
-  @Column({ default: 0 })
+  @Column({ default: 3 })
   totalGenerations: number;
 
   @Column({ nullable: true })
@@ -56,8 +62,12 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   subscriptionExpiresAt?: Date;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.ACTIVE,
+  })
+  subscriptionStatus: SubscriptionStatus;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -73,13 +83,12 @@ export class User {
 
   // Helper methods
   canGenerate(): boolean {
-    return this.remainingGenerations > 0 && this.isActive;
+    return this.remainingGenerations > 0 && this.subscriptionStatus === SubscriptionStatus.ACTIVE;
   }
 
   decrementGenerations(): void {
     if (this.remainingGenerations > 0) {
       this.remainingGenerations--;
-      this.totalGenerations++;
     }
   }
 
@@ -106,7 +115,7 @@ export class User {
         };
       case UserPlan.PRO_PLUS:
         return {
-          generations: 100,
+          generations: 80,
           features: ['Premium resume generation', 'Premium cover letter generation', 'All designs', 'Priority support', 'Custom templates']
         };
       default:

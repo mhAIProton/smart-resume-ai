@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppContextProvider, useAppContext } from './contexts/AppContextProvider';
+import { NavigationProvider, useNavigation, NavigationStep } from './contexts/NavigationContext';
 import Header from './components/Header';
 import BackButton from './components/BackButton';
 import StepMain from './components/steps/StepMain';
@@ -16,7 +16,6 @@ import SubscriptionsPopup from './components/SubscriptionsPopup';
 import MessagePopup from './components/MessagePopup';
 import Loader from './components/Loader';
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,46 +26,63 @@ const queryClient = new QueryClient({
   },
 })
 
+// Navigation logic is now in NavigationContext
+
 // Component to handle OAuth error detection
 const OAuthErrorHandler: React.FC = () => {
   const { setOauthError, setShowAuthModal } = useAppContext();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const error = searchParams.get('error');
+    // Check URL parameters for OAuth errors
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
     if (error === 'oauth_failed') {
       setOauthError(true);
       setShowAuthModal(true);
-      // Clean up the URL by removing the error parameter
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('error');
-      window.history.replaceState({}, '', newUrl.toString());
     }
-  }, [searchParams, setOauthError, setShowAuthModal]);
+  }, [setOauthError, setShowAuthModal]);
 
   return null;
 };
+
+// Component to render current step
+const StepRenderer: React.FC = () => {
+  const { currentStep } = useNavigation();
+
+  switch (currentStep) {
+    case 'main':
+      return <StepMain />;
+    case 'type':
+      return <StepType />;
+    case 'resume':
+      return <StepResume />;
+    case 'design':
+      return <StepDesign />;
+    case 'tone':
+      return <StepTone />;
+    case 'result':
+      return <StepResult />;
+    case 'auth-callback':
+      return <AuthCallback />;
+    default:
+      return <StepMain />;
+  }
+};
+
+// Navigation context is now imported from NavigationContext.tsx
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppContextProvider>
-        <div className="chrome-extension">
-          <Router>
+        <NavigationProvider>
+          <div className="chrome-extension">
             <OAuthErrorHandler />
             <div className="min-h-screen bg-gray-50">
               <Header />
               <BackButton />
               <main className="px-3">
-                <Routes>
-                  <Route path="/" element={<StepMain />} />
-                  <Route path="/type" element={<StepType />} />
-                  <Route path="/resume" element={<StepResume />} />
-                  <Route path="/design" element={<StepDesign />} />
-                  <Route path="/tone" element={<StepTone />} />
-                  <Route path="/result" element={<StepResult />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                </Routes>
+                <StepRenderer />
               </main>
               <AuthModal />
               <SubscriptionsPopup />
@@ -83,8 +99,8 @@ function App() {
                 }}
               />
             </div>
-          </Router>
-        </div>
+          </div>
+        </NavigationProvider>
       </AppContextProvider>
     </QueryClientProvider>
   )

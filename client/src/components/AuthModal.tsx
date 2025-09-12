@@ -2,12 +2,36 @@ import React from 'react';
 import { useAppContext } from "@/contexts/AppContextProvider";
 
 const AuthModal: React.FC = () => {
-  const { showAuthModal, setShowAuthModal, oauthError, setOauthError } = useAppContext();
+  const { showAuthModal, setShowAuthModal, oauthError, setOauthError, login } = useAppContext();
 
-  const handleGoogleAuth = () => {
-    // Перенаправляем на Google OAuth
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    window.location.href = `${apiUrl}/auth/google`;
+  const handleGoogleAuth = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      
+      // Отправляем сообщение в background script
+      chrome.runtime.sendMessage({ action: 'googleAuth', apiUrl }, async (response) => {
+        if (response.success && response.user) {
+          // Преобразуем данные пользователя в формат, ожидаемый контекстом
+          const user = {
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name,
+            plan: response.user.plan || 'free',
+            remainingGenerations: response.user.remainingGenerations || 3,
+            totalGenerations: response.user.totalGenerations || 0,
+            subscriptionStatus: response.user.subscriptionStatus || 'active'
+          };
+
+          // Логиним пользователя
+          await login(user);
+          setShowAuthModal(false);
+        } else {
+          setOauthError(true);
+        }
+      });
+    } catch (error) {
+      setOauthError(true);
+    }
   }
 
   const handleClose = () => {

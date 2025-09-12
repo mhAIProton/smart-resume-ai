@@ -4,9 +4,11 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import compression from 'compression';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Security middleware
   app.use(helmet());
@@ -16,8 +18,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'chrome-extension://*',
-      'https://smartresumeai.com',
-      'https://*.smartresumeai.com',
+      'https://smartresume-ai.com',
+      'https://*.smartresume-ai.com',
       'http://localhost:3000',
       'http://localhost:5173'
     ],
@@ -45,6 +47,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Serve static files
+  app.useStaticAssets(join(__dirname, '..', 'public'));
 
   // Global prefix
   app.setGlobalPrefix('api/v1');

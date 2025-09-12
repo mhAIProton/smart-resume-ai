@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OpenaiService, GenerateResumeRequest, GenerateCoverLetterRequest } from './openai.service';
@@ -25,7 +25,7 @@ export class OpenaiController {
     @GetUser() user: User,
   ) {
     if (!user.canGenerate()) {
-      throw new Error('Insufficient generations remaining');
+      throw new ForbiddenException('Insufficient generations remaining');
     }
 
     // dev-code
@@ -46,7 +46,7 @@ export class OpenaiController {
     @GetUser() user: User,
   ) {
     if (!user.canGenerate()) {
-      throw new Error('Insufficient generations remaining');
+      throw new ForbiddenException('Insufficient generations remaining');
     }
 
     // Уменьшаем количество доступных генераций
@@ -72,7 +72,7 @@ export class OpenaiController {
     @GetUser() user: User,
   ) {
     if (!user.canGenerate()) {
-      throw new Error('Insufficient generations remaining');
+      throw new ForbiddenException('Insufficient generations remaining');
     }
 
     // Уменьшаем количество доступных генераций

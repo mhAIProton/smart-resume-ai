@@ -1,17 +1,16 @@
 import React from 'react';
-import {useNavigate, useLocation} from 'react-router-dom';
+import {useNavigation} from '@/contexts/NavigationContext';
 
 const BackButton: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+    const {goBack, canGoBack, currentStep} = useNavigation();
 
     // Не показывать кнопку Back на главной странице и на странице результата
-    if (location.pathname === '/') {
+    if (currentStep === 'main' || currentStep === 'result' || !canGoBack) {
         return null;
     }
 
     const handleBack = () => {
-        navigate(-1);
+        goBack();
     };
 
     return (
