@@ -9,7 +9,7 @@ if [ -f ".env.local" ]; then
 fi
 
 # Set default values if not provided
-BACKUP_DIR=${BACKUP_DIR:-../backups}
+BACKUP_DIR=${BACKUP_DIR:-./backups}
 RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-60}  # 2 months = 60 days
 
 echo "Starting cleanup of old database backups..."
@@ -43,4 +43,3 @@ echo "Cleanup completed!"
 echo "Files deleted: $DELETED_COUNT"
 echo "Files remaining: $FILES_AFTER"
 echo "Cleanup process completed at $(date)"
-EOF

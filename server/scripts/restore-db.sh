@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# PostgreSQL Database Restore Script
-# Usage: ./restore-db.sh <backup_file>
+# PostgreSQL Database Restore Script for Docker
+# Usage: ./restore-db-docker.sh <backup_file>
 
 # Load environment variables from .env.local
 if [ -f ".env.local" ]; then
@@ -9,7 +9,7 @@ if [ -f ".env.local" ]; then
 fi
 
 # Set default values if not provided
-DB_HOST=${DB_HOST:-localhost}
+DB_HOST=${DB_HOST:-smart-resume-ai-pg}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-smart_resume_ai}
 DB_USERNAME=${DB_USERNAME:-postgres}
@@ -17,7 +17,7 @@ DB_USERNAME=${DB_USERNAME:-postgres}
 # Check if backup file is provided
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <backup_file>"
-    echo "Example: $0 ../backups/smart_resume_ai_backup_20240913_120000.sql.gz"
+    echo "Example: $0 ./backups/smart_resume_ai_backup_20240913_120000.sql.gz"
     exit 1
 fi
 
@@ -29,10 +29,7 @@ if [ ! -f "$BACKUP_FILE" ]; then
     exit 1
 fi
 
-# Set PGPASSWORD environment variable for non-interactive restore
-export PGPASSWORD="$DB_PASSWORD"
-
-echo "Starting database restore..."
+echo "Starting database restore using Docker..."
 echo "Database: $DB_NAME"
 echo "Host: $DB_HOST:$DB_PORT"
 echo "Backup file: $BACKUP_FILE"
@@ -47,24 +44,23 @@ fi
 
 # Check if file is compressed
 if [[ "$BACKUP_FILE" == *.gz ]]; then
-    echo "Decompressing backup file..."
-    gunzip -c "$BACKUP_FILE" | psql \
-        --host="$DB_HOST" \
-        --port="$DB_PORT" \
+    echo "Decompressing and restoring backup file..."
+    gunzip -c "$BACKUP_FILE" | docker exec -i smart-resume-ai-pg psql \
+        --host=localhost \
+        --port=5432 \
         --username="$DB_USERNAME" \
-        --dbname="postgres" \
+        --dbname=postgres \
         --no-password \
         --verbose
 else
     echo "Restoring from uncompressed backup file..."
-    psql \
-        --host="$DB_HOST" \
-        --port="$DB_PORT" \
+    docker exec -i smart-resume-ai-pg psql \
+        --host=localhost \
+        --port=5432 \
         --username="$DB_USERNAME" \
-        --dbname="postgres" \
+        --dbname=postgres \
         --no-password \
-        --verbose \
-        --file="$BACKUP_FILE"
+        --verbose < "$BACKUP_FILE"
 fi
 
 # Check if restore was successful
@@ -75,8 +71,4 @@ else
     exit 1
 fi
 
-# Unset password variable
-unset PGPASSWORD
-
 echo "Restore process completed at $(date)"
-EOF

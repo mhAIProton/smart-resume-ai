@@ -56,4 +56,3 @@ else
 fi
 
 echo "Backup process completed at $(date)"
-EOF
