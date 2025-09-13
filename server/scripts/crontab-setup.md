@@ -3,7 +3,7 @@
 ## Скрипты
 
 1. `backup-db.sh` - создание бэкапа базы данных
-2. `cleanup-old-backups.sh` - удаление старых бэкапов (старше 2 месяцев)
+2. `clean-old-backups.sh` - удаление старых бэкапов (старше 2 месяцев)
 3. `restore-db.sh` - восстановление базы данных из бэкапа
 
 ## Настройка crontab
@@ -12,7 +12,7 @@
 
 ```bash
 chmod +x /root/smart-resume-ai/server/scripts/backup-db.sh
-chmod +x /root/smart-resume-ai/server/scripts/cleanup-old-backups.sh
+chmod +x /root/smart-resume-ai/server/scripts/clean-old-backups.sh
 chmod +x /root/smart-resume-ai/server/scripts/restore-db.sh
 ```
 
@@ -30,7 +30,7 @@ crontab -e
 0 * * * * cd /root/smart-resume-ai/server && ./scripts/backup-db.sh >> /var/log/backup-db.log 2>&1
 
 # Очистка старых бэкапов каждое воскресенье в 2:00
-0 2 * * 0 cd /root/smart-resume-ai/server && ./scripts/cleanup-old-backups.sh >> /var/log/cleanup-backups.log 2>&1
+0 2 * * 0 cd /root/smart-resume-ai/server && ./scripts/clean-old-backups.sh >> /var/log/clean-backups.log 2>&1
 ```
 
 ### 3. Альтернативная конфигурация (если нужны менее частые бэкапы)
@@ -43,7 +43,7 @@ crontab -e
 0 3 * * * cd /root/smart-resume-ai/server && ./scripts/backup-db.sh >> /var/log/backup-db.log 2>&1
 
 # Очистка старых бэкапов каждое воскресенье в 2:00
-0 2 * * 0 cd /root/smart-resume-ai/server && ./scripts/cleanup-old-backups.sh >> /var/log/cleanup-backups.log 2>&1
+0 2 * * 0 cd /root/smart-resume-ai/server && ./scripts/clean-old-backups.sh >> /var/log/clean-backups.log 2>&1
 ```
 
 ## Переменные окружения
@@ -75,14 +75,14 @@ service cron status
 ### Посмотреть логи
 ```bash
 tail -f /var/log/backup-db.log
-tail -f /var/log/cleanup-backups.log
+tail -f /var/log/clean-backups.log
 ```
 
 ### Ручной запуск скриптов для тестирования
 ```bash
 cd /root/smart-resume-ai/server
 ./scripts/backup-db.sh
-./scripts/cleanup-old-backups.sh
+./scripts/clean-old-backups.sh
 ```
 
 ## Восстановление из бэкапа

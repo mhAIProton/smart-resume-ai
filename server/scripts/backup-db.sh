@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# PostgreSQL Database Backup Script
-# This script creates a backup of the PostgreSQL database
+# PostgreSQL Database Backup Script for Docker
+# This script creates a backup of the PostgreSQL database running in Docker
 
 # Load environment variables from .env.local
 if [ -f ".env.local" ]; then
@@ -9,11 +9,11 @@ if [ -f ".env.local" ]; then
 fi
 
 # Set default values if not provided
-DB_HOST=${DB_HOST:-localhost}
+DB_HOST=${DB_HOST:-smart-resume-ai-pg}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-smart_resume_ai}
 DB_USERNAME=${DB_USERNAME:-postgres}
-BACKUP_DIR=${BACKUP_DIR:-../backups}
+BACKUP_DIR=${BACKUP_DIR:-./backups}
 
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
@@ -22,18 +22,15 @@ mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="$BACKUP_DIR/smart_resume_ai_backup_$TIMESTAMP.sql"
 
-# Set PGPASSWORD environment variable for non-interactive backup
-export PGPASSWORD="$DB_PASSWORD"
-
-echo "Starting database backup..."
+echo "Starting database backup from Docker container..."
 echo "Database: $DB_NAME"
 echo "Host: $DB_HOST:$DB_PORT"
 echo "Backup file: $BACKUP_FILE"
 
-# Create the backup
-pg_dump \
-    --host="$DB_HOST" \
-    --port="$DB_PORT" \
+# Create the backup using docker exec
+docker exec smart-resume-ai-pg pg_dump \
+    --host=localhost \
+    --port=5432 \
     --username="$DB_USERNAME" \
     --dbname="$DB_NAME" \
     --no-password \
@@ -41,8 +38,7 @@ pg_dump \
     --clean \
     --if-exists \
     --create \
-    --format=plain \
-    --file="$BACKUP_FILE"
+    --format=plain > "$BACKUP_FILE"
 
 # Check if backup was successful
 if [ $? -eq 0 ]; then
@@ -58,9 +54,6 @@ else
     echo "Backup failed!"
     exit 1
 fi
-
-# Unset password variable
-unset PGPASSWORD
 
 echo "Backup process completed at $(date)"
 EOF
