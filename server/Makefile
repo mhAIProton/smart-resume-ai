@@ -57,6 +57,12 @@ clean:
 # Rebuild and restart
 rebuild: clean build up
 
+# Rebuild and restart api container
+rebuild-api:
+	docker-compose down smart-resume-ai-api
+	docker-compose build smart-resume-ai-api
+	docker-compose up -d smart-resume-ai-api
+
 # Development helpers
 dev-logs:
 	docker-compose logs -f --tail=100
