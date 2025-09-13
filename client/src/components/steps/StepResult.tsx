@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Copy, Download, RefreshCcw} from 'lucide-react';
 import { useAppContext, User } from '@/contexts/AppContextProvider';
+import { useNavigation } from '@/contexts/NavigationContext';
 import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
@@ -20,6 +21,7 @@ const StepResult: React.FC = () => {
     setShowMessagePopup,
     setMessagePopupData
   } = useAppContext();
+  const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   
@@ -186,9 +188,7 @@ const StepResult: React.FC = () => {
   const handleStartNew = () => {
     // Очищаем все данные форм
     clearFormData();
-    // toast.success('Starting new generation...');
-    // Перенаправляем на первый шаг
-    window.location.href = '/';
+    navigate('main');
   };
 
   if (generateResume.loading || generateCoverLetter.loading) {

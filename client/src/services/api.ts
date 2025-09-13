@@ -82,7 +82,7 @@ class ApiService {
           await removeFromStorage(STORAGE_KEYS.USER_DATA);
           // В Chrome расширении не нужно перенаправлять, просто очищаем состояние
           if (typeof window !== 'undefined' && window.location) {
-            window.location.href = '/';
+            window.location.reload();
           }
         }
         return Promise.reject(error);

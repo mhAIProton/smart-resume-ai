@@ -8,8 +8,7 @@ const Header: React.FC = () => {
     isAuthenticated, 
     user, 
     setShowAuthModal, 
-    setShowSubscriptionsPopup, 
-    setShowLoader,
+    setShowSubscriptionsPopup,
     clearFormData,
     logout 
   } = useAppContext();
@@ -30,14 +29,6 @@ const Header: React.FC = () => {
 
   const handlePlanClick = () => {
     setShowSubscriptionsPopup(true);
-  };
-
-  const handleGenerationsClick = () => {
-    setShowLoader(true);
-    // Auto-hide loader after 3 seconds for demonstration
-    setTimeout(() => {
-      setShowLoader(false);
-    }, 5000);
   };
 
   return (
@@ -97,7 +88,6 @@ const Header: React.FC = () => {
 
           {/* Generations left badge */}
           <button
-            onClick={handleGenerationsClick}
             className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-8 hover:bg-gray-200 transition-colors"
           >
               <span className="text-xs text-gray-700">

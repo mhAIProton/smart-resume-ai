@@ -82,7 +82,10 @@ async function initiateGoogleAuth(apiUrl = 'http://localhost:3000') {
     }
     
     // Store token and user data
-    await chrome.storage.local.set({ authToken: token, userData: user });
+    await chrome.storage.local.set({ 
+      'smart_resume_auth_token': token, 
+      'smart_resume_user_data': user 
+    });
     
     return { success: true, token, user };
   } catch (error) {
@@ -112,7 +115,7 @@ async function getUserProfile(token, apiUrl = 'http://localhost:3000') {
 
 async function logout() {
   try {
-    await chrome.storage.local.remove(['authToken', 'userData']);
+    await chrome.storage.local.remove(['smart_resume_auth_token', 'smart_resume_user_data']);
     console.log('User logged out successfully');
   } catch (error) {
     console.error('Logout error:', error);

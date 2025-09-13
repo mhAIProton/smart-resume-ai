@@ -60,7 +60,7 @@ export interface AppContextType {
     } | null;
     
     // Actions
-    setUser: (user: User | null) => void;
+    setUser: (user: User | null) => Promise<void>;
     setOauthError: (error: boolean) => void;
     setJobDescription: (jobDescription: JobDescription | null) => Promise<void>;
     setGenerationType: (type: 'resume' | 'cover-letter' | null) => Promise<void>;
@@ -98,7 +98,7 @@ export const AppContext = createContext<AppContextType>({
     showMessagePopup: false,
     showLoader: false,
     messagePopupData: null,
-    setUser: () => {},
+    setUser: async () => {},
     setOauthError: () => {},
     setJobDescription: async () => {},
     setGenerationType: async () => {},
@@ -141,9 +141,15 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
     // Storage functions are now imported from chromeStorage utility
 
-    const setUser = (user: User | null) => {
+    const setUser = async (user: User | null) => {
         setUserState(user);
         setIsAuthenticated(!!user);
+        
+        if (user) {
+            await saveToStorage(STORAGE_KEYS.USER_DATA, user);
+        } else {
+            await removeFromStorage(STORAGE_KEYS.USER_DATA);
+        }
     };
 
     const setJobDescription = async (jobDescription: JobDescription | null) => {
@@ -215,18 +221,15 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     };
 
     const login = async (user: User) => {
-        setUser(user);
+        await setUser(user);
         setShowAuthModal(false);
         setOauthError(false);
-        // Сохраняем данные пользователя в storage
-        await saveToStorage(STORAGE_KEYS.USER_DATA, user);
     };
 
     const logout = async () => {
-        setUser(null);
+        await setUser(null);
         await clearFormData();
         await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);
-        await removeFromStorage(STORAGE_KEYS.USER_DATA);
     };
 
     // Функция для проверки авторизации при загрузке приложения
@@ -235,8 +238,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
             // Сначала проверяем, есть ли сохраненные данные пользователя
             const savedUserData = await loadFromStorage(STORAGE_KEYS.USER_DATA);
             if (savedUserData) {
-                setUser(savedUserData);
-                setIsAuthenticated(true);
+                await setUser(savedUserData);
                 return;
             }
 
@@ -261,10 +263,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                             totalGenerations: userData.totalGenerations,
                             subscriptionStatus: userData.subscriptionStatus,
                         };
-                        setUser(user);
-                        setIsAuthenticated(true);
-                        // Сохраняем данные пользователя
-                        await saveToStorage(STORAGE_KEYS.USER_DATA, user);
+                        await setUser(user);
                     } else {
                         // Токен недействителен, удаляем его
                         await removeFromStorage(STORAGE_KEYS.AUTH_TOKEN);

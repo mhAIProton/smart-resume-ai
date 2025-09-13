@@ -99,8 +99,8 @@ export const STORAGE_KEYS = {
   SELECTED_TONE: 'smart_resume_selected_tone',
   RESUME_DATA: 'smart_resume_resume_data',
   SELECTED_DESIGN: 'smart_resume_selected_design',
-  AUTH_TOKEN: 'auth_token',
-  USER_DATA: 'user_data',
+  AUTH_TOKEN: 'smart_resume_auth_token',
+  USER_DATA: 'smart_resume_user_data',
 } as const;
 
 // Helper functions for common operations

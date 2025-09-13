@@ -83,7 +83,7 @@ export class User {
 
   // Helper methods
   canGenerate(): boolean {
-    return this.remainingGenerations > 0 && this.subscriptionStatus === SubscriptionStatus.ACTIVE;
+    return this.remainingGenerations > 0;
   }
 
   decrementGenerations(): void {
