@@ -6,32 +6,32 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/certs:/etc/nginx/certs:ro
-      - /etc/nginx/vhost.d:/etc/nginx/vhost.d
-      - /usr/share/nginx/html:/usr/share/nginx/html
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/vhost.d:/etc/nginx/vhost.d
+      - ./nginx/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - smart-resume-ai-net
+    restart: unless-stopped
 
   smart-resume-ai-api:
     build:                       # собираем локально
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: smart-resume-ai-api
     env_file:
       - .env.local                # берёт все секреты и ключи
     environment:                 # только то, чего нет в .env
-      NODE_ENV: development      # development | production
-      VIRTUAL_HOST: api.smartresumeai.com
+      NODE_ENV: production
+      VIRTUAL_HOST: smartresume-ai.com
       VIRTUAL_PORT: 3000
-      LETSENCRYPT_HOST: api.smartresumeai.com
-      LETSENCRYPT_EMAIL: smartresumeai@gmail.com
-    ports:
-      - "3000:3000"             # пробрасываем порт на хост
+      LETSENCRYPT_HOST: smartresume-ai.com
+      LETSENCRYPT_EMAIL: resumecopilotai@gmail.com
     networks:
       - smart-resume-ai-net
     depends_on:
       - smart-resume-ai-pg       # ждём Postgres
+    restart: unless-stopped
 
   smart-resume-ai-pg:
     image: postgres:15
@@ -39,7 +39,8 @@ services:
     env_file:
       - .env.local              # POSTGRES_* переменные берутся отсюда
     volumes:
-      - smart-resume-ai-postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./backups:/backups
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}" ]
       interval: 2s
@@ -47,9 +48,11 @@ services:
       retries: 10
     networks:
       - smart-resume-ai-net
+    restart: unless-stopped
+    command: postgres -c 'max_connections=200'
 
 volumes:
-  smart-resume-ai-postgres-data:
+  postgres-data:
 
 networks:
   smart-resume-ai-net:
