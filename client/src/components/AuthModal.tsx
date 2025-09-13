@@ -1,42 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from "@/contexts/AppContextProvider";
 
 const AuthModal: React.FC = () => {
   const { showAuthModal, setShowAuthModal, oauthError, setOauthError, login } = useAppContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleAuth = async () => {
     try {
+      setIsLoading(true);
+      setOauthError(false);
+      
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
       // Отправляем сообщение в background script
       chrome.runtime.sendMessage({ action: 'googleAuth', apiUrl }, async (response) => {
-        if (response.success && response.user) {
-          // Преобразуем данные пользователя в формат, ожидаемый контекстом
-          const user = {
-            id: response.user.id,
-            email: response.user.email,
-            name: response.user.name,
-            plan: response.user.plan || 'free',
-            remainingGenerations: response.user.remainingGenerations || 3,
-            totalGenerations: response.user.totalGenerations || 0,
-            subscriptionStatus: response.user.subscriptionStatus || 'active'
-          };
+        try {
+          if (response.success && response.user) {
+            // Преобразуем данные пользователя в формат, ожидаемый контекстом
+            const user = {
+              id: response.user.id,
+              email: response.user.email,
+              name: response.user.name,
+              plan: response.user.plan || 'free',
+              remainingGenerations: response.user.remainingGenerations || 3,
+              totalGenerations: response.user.totalGenerations || 0,
+              subscriptionStatus: response.user.subscriptionStatus || 'active'
+            };
 
-          // Логиним пользователя
-          await login(user);
-          setShowAuthModal(false);
-        } else {
-          setOauthError(true);
+            // Логиним пользователя
+            await login(user);
+            setShowAuthModal(false);
+          } else {
+            setOauthError(true);
+          }
+        } finally {
+          setIsLoading(false);
         }
       });
     } catch (error) {
       setOauthError(true);
+      setIsLoading(false);
     }
   }
 
   const handleClose = () => {
     setShowAuthModal(false);
     setOauthError(false);
+    setIsLoading(false);
   }
 
   if (!showAuthModal) return null
@@ -61,10 +71,19 @@ const AuthModal: React.FC = () => {
 
         <button
             onClick={handleGoogleAuth}
-            className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <img src="/google.svg" alt="Continue with Google"/>
-          <span>Continue with Google</span>
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+            </>
+          ) : (
+            <>
+              <img src="/google.svg" alt="Continue with Google"/>
+              <span>Continue with Google</span>
+            </>
+          )}
         </button>
 
         {oauthError && (

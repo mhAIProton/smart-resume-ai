@@ -14,7 +14,7 @@ const BackButton: React.FC = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto px-3 pb-4">
+        <div className="mx-auto px-3 pb-4">
             <button
                 onClick={handleBack}
                 className="text-blue-700 hover:underline flex gap-1 items-center"
