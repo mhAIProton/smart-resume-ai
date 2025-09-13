@@ -20,13 +20,13 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --only=production
 
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/package.json ./
-COPY --from=builder /usr/src/app/.env.local ./
+COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /usr/src/app/package.json ./
+COPY --from=development /usr/src/app/.env.local ./
 # Копируем папку database
-COPY --from=builder /usr/src/app/src/database ./src/database
+COPY --from=development /usr/src/app/src/database ./src/database
 # Копируем миграции
-COPY --from=builder /usr/src/app/src/migrations ./src/migrations
+COPY --from=development /usr/src/app/src/migrations ./src/migrations
 
 EXPOSE 3000
 

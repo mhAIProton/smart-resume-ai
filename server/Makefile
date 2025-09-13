@@ -10,6 +10,10 @@ build:
 up:
 	docker-compose up -d
 
+# Easy stop
+stop:
+	docker-compose stop
+
 # Stop services
 down:
 	docker-compose down

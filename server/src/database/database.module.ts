@@ -19,7 +19,7 @@ import { Generation } from '../generations/entities/generation.entity';
         entities: [User, Order, Generation],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
-        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+        ssl: false,
       }),
       inject: [ConfigService],
     }),
