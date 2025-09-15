@@ -27,6 +27,8 @@ COPY --from=development /usr/src/app/.env.local ./
 COPY --from=development /usr/src/app/src/database ./src/database
 # Копируем миграции
 COPY --from=development /usr/src/app/src/migrations ./src/migrations
+# Копируем папку public
+COPY --from=development /usr/src/app/public ./public
 
 EXPOSE 3000
 

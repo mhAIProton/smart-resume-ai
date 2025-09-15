@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,6 +14,9 @@ async function bootstrap() {
   // Security middleware
   app.use(helmet());
   app.use(compression());
+
+  // Middleware для raw body (для Stripe webhook)
+  app.use('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }));
 
   // CORS configuration
   app.enableCors({
@@ -57,8 +61,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   
-  console.log(`🚀 SmartResumeAI API is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  // console.log(`🚀 SmartResumeAI API is running on: http://localhost:${port}`);
+  // console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();
