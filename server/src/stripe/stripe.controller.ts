@@ -101,10 +101,10 @@ export class StripeController {
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @Req() req: Request & { rawBody?: Buffer },
+    @RawBody() payload: Buffer, // Используем @RawBody() с Buffer
+    @Req() req: Request,
   ) {
     try {
-      const payload = req.rawBody;
       console.log('Webhook received, payload length:', payload.length);
       console.log('Signature:', signature);
       

@@ -6,24 +6,13 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
 
   // Security middleware
   app.use(helmet());
   app.use(compression());
-
-  // Middleware для raw body только для webhook endpoint
-  app.use('/api/v1/stripe/webhook', 
-    express.raw({ type: 'application/json' }),
-    (req, res, next) => {
-      // Сохраняем raw body для использования в контроллере
-      (req as any).rawBody = req.body;
-      next();
-    }
-  );
 
   // CORS configuration
   app.enableCors({
