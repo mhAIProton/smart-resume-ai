@@ -101,10 +101,11 @@ export class StripeController {
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @RawBody() payload: Buffer,
+    @Body() payload: any,
     @Req() req: Request,
   ) {
     try {
+      console.log('Webhook received:', payload);
       if (!payload) {
         console.error('Webhook error: No payload received');
         throw new Error('No payload received');
@@ -114,6 +115,7 @@ export class StripeController {
         payload.toString(),
         signature,
       );
+      console.log('Event:', event);
 
       // Handle different event types
       switch (event.type) {
