@@ -16,6 +16,7 @@ export interface UpdateUserDto {
   avatar?: string;
   plan?: UserPlan;
   remainingGenerations?: number;
+  totalGenerations?: number; // Add this line
 }
 
 @Injectable()
@@ -61,6 +62,10 @@ export class UsersService {
 
   async findByGoogleId(googleId: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { googleId } });
+  }
+
+  async findByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { stripeCustomerId } });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {

@@ -229,7 +229,51 @@ export class StripeController {
 
   private async handleInvoicePaid(invoice: any) {
     console.log('Invoice paid:', invoice.id);
-    // Handle successful recurring payment
+    
+    try {
+      // Получаем customer ID из invoice
+      const customerId = invoice.customer;
+      if (!customerId) {
+        console.error('No customer ID in invoice');
+        return;
+      }
+
+      // Находим пользователя по Stripe customer ID
+      const user = await this.usersService.findByStripeCustomerId(customerId);
+      if (!user) {
+        console.error(`User not found for customer ID: ${customerId}`);
+        return;
+      }
+
+      // Получаем subscription ID из invoice
+      const subscriptionId = invoice.subscription;
+      if (!subscriptionId) {
+        console.error('No subscription ID in invoice');
+        return;
+      }
+
+      // Получаем информацию о подписке из Stripe
+      const subscription = await this.stripeService.getSubscription(subscriptionId);
+      
+      // Обновляем subscriptionExpiresAt на основе current_period_end
+      const subscriptionExpiresAt = new Date(subscription.current_period_end * 1000);
+      await this.usersService.setSubscriptionExpiry(user.id, subscriptionExpiresAt);
+
+      // Обновляем remainingGenerations на основе плана
+      const planLimits = user.getPlanLimits();
+      
+      // Сохраняем обновленного пользователя
+      await this.usersService.update(user.id, {
+        remainingGenerations: planLimits.generations,
+        totalGenerations: planLimits.generations
+      });
+
+      console.log(`Invoice paid processed for user ${user.id}:`);
+      console.log(`- Subscription expires at: ${subscriptionExpiresAt}`);
+
+    } catch (error) {
+      console.error('Error processing invoice.paid webhook:', error);
+    }
   }
 
   // // ===== SIMULATION ENDPOINTS FOR TESTING =====
