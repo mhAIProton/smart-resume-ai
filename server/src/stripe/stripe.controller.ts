@@ -101,28 +101,27 @@ export class StripeController {
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @Body() payload: any,
+    @RawBody() payload: Buffer, // Используем @RawBody() с Buffer
     @Req() req: Request,
   ) {
     try {
-      console.log('Webhook received:', payload);
+      console.log('Webhook received, payload length:', payload.length);
+      console.log('Signature:', signature);
+      
       if (!payload) {
         console.error('Webhook error: No payload received');
         throw new Error('No payload received');
       }
 
-      // Получаем raw body из request
-      const rawBody = req.body;
-      if (!rawBody) {
-        console.error('Webhook error: No raw body received');
-        throw new Error('No raw body received');
-      }
+      // Преобразуем Buffer в строку - это даст точную raw строку
+      const rawBodyString = payload.toString('utf8');
+      console.log('Raw body string length:', rawBodyString.length);
 
       const event = await this.stripeService.constructWebhookEvent(
-        JSON.stringify(rawBody), // Преобразуем в строку
+        rawBodyString, // Передаем точную raw строку
         signature,
       );
-      console.log('Event:', event);
+      console.log('Event type:', event.type);
 
       // Handle different event types
       switch (event.type) {
@@ -140,6 +139,9 @@ export class StripeController {
           break;
         case 'invoice.payment_failed':
           await this.handleInvoicePaymentFailed(event.data.object);
+          break;
+        case 'invoice.paid':
+          await this.handleInvoicePaid(event.data.object);
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
@@ -223,6 +225,11 @@ export class StripeController {
   private async handleInvoicePaymentFailed(invoice: any) {
     console.log('Invoice payment failed:', invoice.id);
     // Handle failed payment
+  }
+
+  private async handleInvoicePaid(invoice: any) {
+    console.log('Invoice paid:', invoice.id);
+    // Handle successful recurring payment
   }
 
   // // ===== SIMULATION ENDPOINTS FOR TESTING =====
