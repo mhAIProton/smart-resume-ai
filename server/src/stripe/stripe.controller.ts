@@ -111,8 +111,15 @@ export class StripeController {
         throw new Error('No payload received');
       }
 
+      // Получаем raw body из request
+      const rawBody = req.body;
+      if (!rawBody) {
+        console.error('Webhook error: No raw body received');
+        throw new Error('No raw body received');
+      }
+
       const event = await this.stripeService.constructWebhookEvent(
-        payload.toString(),
+        JSON.stringify(rawBody), // Преобразуем в строку
         signature,
       );
       console.log('Event:', event);
