@@ -40,7 +40,7 @@ const Header: React.FC = () => {
               className="flex items-center hover:opacity-80 transition-opacity"
           >
             <img
-                src="/logo.png"
+                src="/logo.svg"
                 alt="SmartResumeAI"
                 className="object-contain h-8"
             />
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
               <path fillRule="evenodd" clipRule="evenodd" d="M12.3041 11.5137C13.3537 10.4332 14 8.95876 14 7.33337C14 5.6981 13.3458 4.21562 12.2849 3.13337C11.1959 2.02256 9.67844 1.33337 8 1.33337C4.68629 1.33337 2 4.01967 2 7.33337C2 8.95871 2.64627 10.4331 3.69585 11.5136L3.44213 12.0528C2.86996 13.2687 3.75715 14.6667 5.10099 14.6667H10.8989C12.2428 14.6667 13.13 13.2687 12.5577 12.0527L12.3041 11.5137ZM8 12.3334C10.7614 12.3334 13 10.0948 13 7.33337C13 5.9703 12.4559 4.73632 11.5708 3.83342C10.6621 2.90655 9.39891 2.33337 8 2.33337C5.23858 2.33337 3 4.57195 3 7.33337C3 10.0948 5.23858 12.3334 8 12.3334ZM11.5189 12.1937C10.5303 12.9106 9.31453 13.3334 8 13.3334C6.68542 13.3334 5.46959 12.9106 4.48104 12.1936L4.34696 12.4786C4.08688 13.0313 4.49015 13.6667 5.10099 13.6667H10.8989C11.5098 13.6667 11.913 13.0312 11.6529 12.4785L11.5189 12.1937Z" fill="currentColor"/>
           </svg>
             <span className="text-xs font-medium capitalize">
-                {user?.plan === 'pro_plus' ? 'Pro+ Plan' : user?.plan === 'pro' ? 'Pro Plan' : 'Free'}
+                {user?.plan === 'pro_plus' ? 'Pro+ Plan' : user?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}
               </span>
           </button>
 

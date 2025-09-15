@@ -68,6 +68,34 @@ export class StripeController {
     return { prices };
   }
 
+  @Get('subscription-success')
+  @ApiOperation({ summary: 'Show subscription success page' })
+  async showSubscriptionSuccess(@Res() res: any) {
+    try {
+      const htmlPath = join(process.cwd(), 'public', 'views', 'subscription-success.html');
+      const html = readFileSync(htmlPath, 'utf8');
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } catch (error) {
+      console.error('Error loading subscription success page:', error);
+      res.status(500).send('Error loading page');
+    }
+  }
+
+  @Get('subscription-cancel')
+  @ApiOperation({ summary: 'Show subscription cancel page' })
+  async showSubscriptionCancel(@Res() res: any) {
+    try {
+      const htmlPath = join(process.cwd(), 'public', 'views', 'subscription-cancel.html');
+      const html = readFileSync(htmlPath, 'utf8');
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } catch (error) {
+      console.error('Error loading subscription cancel page:', error);
+      res.status(500).send('Error loading page');
+    }
+  }
+
   @Post('webhook')
   @ApiOperation({ summary: 'Handle Stripe webhooks' })
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })

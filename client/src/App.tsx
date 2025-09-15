@@ -78,12 +78,16 @@ function App() {
         <NavigationProvider>
           <div className="chrome-extension">
             <OAuthErrorHandler />
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 relative">
               <Header />
               <BackButton />
-              <main className="px-3">
+              <main className="px-3 pb-20">
                 <StepRenderer />
               </main>
+              <footer className="absolute bottom-0 left-0 right-0 p-4 text-center">
+                <p>Any questions? Please write here!</p>
+                <a href="mailto:resumecopilotai@gmail.com" className="text-blue-600 text-base font-semibold hover:text-blue-700 hover:underline transition-colors">resumecopilotai@gmail.com</a>
+              </footer>
               <AuthModal />
               <SubscriptionsPopup />
               <MessagePopup />

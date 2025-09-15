@@ -30,11 +30,11 @@ const StepMain: React.FC = () => {
   }
 
   const isTextExist = () => {
-    return jobText.trim().length >= 10;
+    return jobText.replace(/\d/g, '').trim().length >= 10;
   }
 
   const isTextTooLarge = () => {
-    return jobText.trim().length > 2000;
+    return jobText.length > 2000;
   }
 
   return (

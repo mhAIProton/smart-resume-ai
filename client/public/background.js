@@ -25,8 +25,8 @@ chrome.action.onClicked.addListener((tab) => {
 async function initiateGoogleAuth(apiUrl = 'http://localhost:3000') {
   try {
     // Use Google OAuth directly with proper redirect_uri
-    // const clientId = '1042963792345-mlb3jmbungsmno1vensbne979rdi7mjn.apps.googleusercontent.com'; // dev
-    const clientId = '800726633839-h9t8d32fka49q26bo3qtbe2qbp7o2rf8.apps.googleusercontent.com'; // dev
+    const clientId = '1042963792345-mlb3jmbungsmno1vensbne979rdi7mjn.apps.googleusercontent.com'; // dev
+    // const clientId = '800726633839-h9t8d32fka49q26bo3qtbe2qbp7o2rf8.apps.googleusercontent.com'; // dev
     const redirectUri = `https://${chrome.runtime.id}.chromiumapp.org/`;
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&response_type=code&scope=email%20profile&redirect_uri=${encodeURIComponent(redirectUri)}`;
     

@@ -90,9 +90,9 @@ const StepResume: React.FC = () => {
 
   const hasInput = () => {
     if (selectedOption === 'generate') {
-      return generateText.trim().length > 10;
+      return generateText.replace(/\d/g, '').trim().length > 10;
     } else if (selectedOption === 'improve') {
-      return improveText.trim().length > 10 || uploadedFile !== null;
+      return improveText.replace(/\d/g, '').trim().length > 10 || uploadedFile !== null;
     }
     return false;
   }
@@ -140,7 +140,7 @@ const StepResume: React.FC = () => {
                     rows={4}
                   />
 
-                  {generateText.trim().length > 10 && (
+                  {hasInput() && (
                     <div className="flex items-center space-x-1 py-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-green-600">Text input detected. Ready to continue</span>

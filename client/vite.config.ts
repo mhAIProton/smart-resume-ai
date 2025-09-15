@@ -35,24 +35,6 @@ function copyExtensionFiles() {
         mkdirSync(iconsDir, { recursive: true });
       }
       
-      // Copy logo as icon
-      copyFileSync(
-        resolve(__dirname, 'public/logo.png'),
-        resolve(iconsDir, 'icon16.png')
-      );
-      copyFileSync(
-        resolve(__dirname, 'public/logo.png'),
-        resolve(iconsDir, 'icon32.png')
-      );
-      copyFileSync(
-        resolve(__dirname, 'public/logo.png'),
-        resolve(iconsDir, 'icon48.png')
-      );
-      copyFileSync(
-        resolve(__dirname, 'public/logo.png'),
-        resolve(iconsDir, 'icon128.png')
-      );
-      
       // Copy all SVG files
       const svgFiles = [
         'circle-daw.svg', 'circle.svg', 'cover-letter.svg', 'daw.svg',

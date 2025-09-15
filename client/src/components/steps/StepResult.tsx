@@ -191,6 +191,20 @@ const StepResult: React.FC = () => {
     navigate('main');
   };
 
+  if (Number(user?.remainingGenerations) < 1) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[72vh]">
+        <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>You have no generations remaining.<br/> Please upgrade your plan to generate more content.</h3>
+        <button
+          onClick={() => console.log('Upgrade Plan')}
+          className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+        >
+          <span className="font-medium">Upgrade Plan</span>
+        </button>
+      </div>
+    );
+  }
+
   if (generateResume.loading || generateCoverLetter.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
