@@ -16,7 +16,14 @@ async function bootstrap() {
   app.use(compression());
 
   // Middleware для raw body только для webhook endpoint
-  app.use('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }));
+  app.use('/api/v1/stripe/webhook', 
+    express.raw({ type: 'application/json' }),
+    (req, res, next) => {
+      // Сохраняем raw body для использования в контроллере
+      (req as any).rawBody = req.body;
+      next();
+    }
+  );
 
   // CORS configuration
   app.enableCors({
