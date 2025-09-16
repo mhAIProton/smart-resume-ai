@@ -101,14 +101,27 @@ export class StripeController {
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @RawBody() payload: Buffer,
+    @RawBody() payload: Buffer, // Используем @RawBody() с Buffer
     @Req() req: Request,
   ) {
     try {
+      console.log('Webhook received, payload length:', payload.length);
+      console.log('Signature:', signature);
+      
+      if (!payload) {
+        console.error('Webhook error: No payload received');
+        throw new Error('No payload received');
+      }
+
+      // Преобразуем Buffer в строку - это даст точную raw строку
+      const rawBodyString = payload.toString('utf8');
+      console.log('Raw body string length:', rawBodyString.length);
+
       const event = await this.stripeService.constructWebhookEvent(
-        payload.toString(),
+        rawBodyString, // Передаем точную raw строку
         signature,
       );
+      console.log('Event type:', event.type);
 
       // Handle different event types
       switch (event.type) {
@@ -126,6 +139,9 @@ export class StripeController {
           break;
         case 'invoice.payment_failed':
           await this.handleInvoicePaymentFailed(event.data.object);
+          break;
+        case 'invoice.paid':
+          await this.handleInvoicePaid(event.data.object);
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
@@ -211,143 +227,162 @@ export class StripeController {
     // Handle failed payment
   }
 
-  // ===== SIMULATION ENDPOINTS FOR TESTING =====
+  private async handleInvoicePaid(invoice: any) {
+    console.log('Invoice paid:', invoice.id);
+    
+    try {
+      // Получаем customer ID из invoice
+      const customerId = invoice.customer;
+      if (!customerId) {
+        console.error('No customer ID in invoice');
+        return;
+      }
+
+      // Находим пользователя по Stripe customer ID
+      const user = await this.usersService.findByStripeCustomerId(customerId);
+      if (!user) {
+        console.error(`User not found for customer ID: ${customerId}`);
+        return;
+      }
+
+      // Получаем subscription ID из invoice
+      const subscriptionId = invoice.subscription;
+      if (!subscriptionId) {
+        console.error('No subscription ID in invoice');
+        return;
+      }
+
+      // Получаем информацию о подписке из Stripe
+      const subscription = await this.stripeService.getSubscription(subscriptionId);
+      
+      // Обновляем subscriptionExpiresAt на основе current_period_end
+      const subscriptionExpiresAt = new Date(subscription.current_period_end * 1000);
+      await this.usersService.setSubscriptionExpiry(user.id, subscriptionExpiresAt);
+
+      // Обновляем remainingGenerations на основе плана
+      const planLimits = user.getPlanLimits();
+      
+      // Сохраняем обновленного пользователя
+      await this.usersService.update(user.id, {
+        remainingGenerations: planLimits.generations,
+        totalGenerations: planLimits.generations
+      });
+
+      console.log(`Invoice paid processed for user ${user.id}:`);
+      console.log(`- Subscription expires at: ${subscriptionExpiresAt}`);
+
+    } catch (error) {
+      console.error('Error processing invoice.paid webhook:', error);
+    }
+  }
+
+  // // ===== SIMULATION ENDPOINTS FOR TESTING =====
   
-  @Post('simulate/subscription-activated')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Simulate subscription activation (for testing)' })
-  @ApiResponse({ status: 200, description: 'Subscription activated successfully' })
-  async simulateSubscriptionActivated(
-    @Body() body: { plan: UserPlan },
-    @GetUser() user: User,
-  ) {
-    const updatedUser = await this.usersService.activateSubscription(user.id, body.plan);
-    return {
-      message: 'Subscription activated successfully',
-      user: {
-        id: updatedUser.id,
-        plan: updatedUser.plan,
-        subscriptionStatus: updatedUser.subscriptionStatus,
-        remainingGenerations: updatedUser.remainingGenerations,
-        totalGenerations: updatedUser.totalGenerations,
-        subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
-      },
-    };
-  }
+  // @Post('simulate/subscription-activated')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Simulate subscription activation (for testing)' })
+  // @ApiResponse({ status: 200, description: 'Subscription activated successfully' })
+  // async simulateSubscriptionActivated(
+  //   @Body() body: { plan: UserPlan },
+  //   @GetUser() user: User,
+  // ) {
+  //   const updatedUser = await this.usersService.activateSubscription(user.id, body.plan);
+  //   return {
+  //     message: 'Subscription activated successfully',
+  //     user: {
+  //       id: updatedUser.id,
+  //       plan: updatedUser.plan,
+  //       subscriptionStatus: updatedUser.subscriptionStatus,
+  //       remainingGenerations: updatedUser.remainingGenerations,
+  //       totalGenerations: updatedUser.totalGenerations,
+  //       subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
+  //     },
+  //   };
+  // }
 
-  @Post('simulate/subscription-canceling')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Simulate subscription canceling (for testing)' })
-  @ApiResponse({ status: 200, description: 'Subscription status set to canceling' })
-  async simulateSubscriptionCanceling(@GetUser() user: User) {
-    const updatedUser = await this.usersService.setSubscriptionCanceling(user.id);
-    return {
-      message: 'Subscription status set to canceling',
-      user: {
-        id: updatedUser.id,
-        plan: updatedUser.plan,
-        subscriptionStatus: updatedUser.subscriptionStatus,
-        remainingGenerations: updatedUser.remainingGenerations,
-        subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
-      },
-    };
-  }
+  // @Post('simulate/subscription-canceling')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Simulate subscription canceling (for testing)' })
+  // @ApiResponse({ status: 200, description: 'Subscription status set to canceling' })
+  // async simulateSubscriptionCanceling(@GetUser() user: User) {
+  //   const updatedUser = await this.usersService.setSubscriptionCanceling(user.id);
+  //   return {
+  //     message: 'Subscription status set to canceling',
+  //     user: {
+  //       id: updatedUser.id,
+  //       plan: updatedUser.plan,
+  //       subscriptionStatus: updatedUser.subscriptionStatus,
+  //       remainingGenerations: updatedUser.remainingGenerations,
+  //       subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
+  //     },
+  //   };
+  // }
 
-  @Post('simulate/subscription-canceled')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Simulate subscription cancellation (for testing)' })
-  @ApiResponse({ status: 200, description: 'Subscription status set to canceled' })
-  async simulateSubscriptionCanceled(@GetUser() user: User) {
-    const updatedUser = await this.usersService.setSubscriptionCanceled(user.id);
-    return {
-      message: 'Subscription status set to canceled',
-      user: {
-        id: updatedUser.id,
-        plan: updatedUser.plan,
-        subscriptionStatus: updatedUser.subscriptionStatus,
-        remainingGenerations: updatedUser.remainingGenerations,
-        totalGenerations: updatedUser.totalGenerations,
-        subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
-      },
-    };
-  }
+  // @Post('simulate/subscription-canceled')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Simulate subscription cancellation (for testing)' })
+  // @ApiResponse({ status: 200, description: 'Subscription status set to canceled' })
+  // async simulateSubscriptionCanceled(@GetUser() user: User) {
+  //   const updatedUser = await this.usersService.setSubscriptionCanceled(user.id);
+  //   return {
+  //     message: 'Subscription status set to canceled',
+  //     user: {
+  //       id: updatedUser.id,
+  //       plan: updatedUser.plan,
+  //       subscriptionStatus: updatedUser.subscriptionStatus,
+  //       remainingGenerations: updatedUser.remainingGenerations,
+  //       totalGenerations: updatedUser.totalGenerations,
+  //       subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
+  //     },
+  //   };
+  // }
 
-  @Post('simulate/add-generations')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Simulate adding generations (for testing)' })
-  @ApiResponse({ status: 200, description: 'Generations added successfully' })
-  async simulateAddGenerations(
-    @Body() body: { count: number },
-    @GetUser() user: User,
-  ) {
-    const updatedUser = await this.usersService.addGenerations(user.id, body.count);
-    return {
-      message: `${body.count} generations added successfully`,
-      user: {
-        id: updatedUser.id,
-        plan: updatedUser.plan,
-        subscriptionStatus: updatedUser.subscriptionStatus,
-        remainingGenerations: updatedUser.remainingGenerations,
-        totalGenerations: updatedUser.totalGenerations,
-      },
-    };
-  }
+  // @Post('simulate/add-generations')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Simulate adding generations (for testing)' })
+  // @ApiResponse({ status: 200, description: 'Generations added successfully' })
+  // async simulateAddGenerations(
+  //   @Body() body: { count: number },
+  //   @GetUser() user: User,
+  // ) {
+  //   const updatedUser = await this.usersService.addGenerations(user.id, body.count);
+  //   return {
+  //     message: `${body.count} generations added successfully`,
+  //     user: {
+  //       id: updatedUser.id,
+  //       plan: updatedUser.plan,
+  //       subscriptionStatus: updatedUser.subscriptionStatus,
+  //       remainingGenerations: updatedUser.remainingGenerations,
+  //       totalGenerations: updatedUser.totalGenerations,
+  //     },
+  //   };
+  // }
 
-  @Get('simulate/user-status')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user subscription status (for testing)' })
-  @ApiResponse({ status: 200, description: 'User status retrieved successfully' })
-  async getUserStatus(@GetUser() user: User) {
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        plan: user.plan,
-        subscriptionStatus: user.subscriptionStatus,
-        remainingGenerations: user.remainingGenerations,
-        totalGenerations: user.totalGenerations,
-        subscriptionExpiresAt: user.subscriptionExpiresAt,
-        canGenerate: user.canGenerate(),
-        isSubscriptionActive: user.isSubscriptionActive(),
-        planLimits: user.getPlanLimits(),
-      },
-    };
-  }
-
-  // ===== SUBSCRIPTION RESULT PAGES =====
-
-  @Get('subscription-success')
-  @ApiOperation({ summary: 'Show subscription success page' })
-  @ApiResponse({ status: 200, description: 'Subscription success page' })
-  async subscriptionSuccess(@Res() res: Response) {
-    try {
-      const filePath = join(__dirname, '..', '..', 'public', 'views', 'subscription-success.html');
-      const html = readFileSync(filePath, 'utf8');
-      res.setHeader('Content-Type', 'text/html');
-      res.send(html);
-    } catch (error) {
-      res.status(500).send('Error loading subscription success page');
-    }
-  }
-
-  @Get('subscription-cancel')
-  @ApiOperation({ summary: 'Show subscription cancel page' })
-  @ApiResponse({ status: 200, description: 'Subscription cancel page' })
-  async subscriptionCancel(@Res() res: Response) {
-    try {
-      const filePath = join(__dirname, '..', '..', 'public', 'views', 'subscription-cancel.html');
-      const html = readFileSync(filePath, 'utf8');
-      res.setHeader('Content-Type', 'text/html');
-      res.send(html);
-    } catch (error) {
-      res.status(500).send('Error loading subscription cancel page');
-    }
-  }
+  // @Get('simulate/user-status')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Get current user subscription status (for testing)' })
+  // @ApiResponse({ status: 200, description: 'User status retrieved successfully' })
+  // async getUserStatus(@GetUser() user: User) {
+  //   return {
+  //     user: {
+  //       id: user.id,
+  //       email: user.email,
+  //       name: user.name,
+  //       plan: user.plan,
+  //       subscriptionStatus: user.subscriptionStatus,
+  //       remainingGenerations: user.remainingGenerations,
+  //       totalGenerations: user.totalGenerations,
+  //       subscriptionExpiresAt: user.subscriptionExpiresAt,
+  //       canGenerate: user.canGenerate(),
+  //       isSubscriptionActive: user.isSubscriptionActive(),
+  //       planLimits: user.getPlanLimits(),
+  //     },
+  //   };
+  // }
 }
 

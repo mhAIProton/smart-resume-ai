@@ -95,7 +95,7 @@ const SubscriptionsPopup: React.FC = () => {
       const { url } = await apiService.createCheckoutSession(selectedPlanOption.priceId);
       
       // Redirect to Stripe checkout
-      window.location.href = url;
+      chrome.tabs.create({ url: url }); // window.location.href = url;
       
     } catch (error) {
       console.error('Error creating checkout session:', error);
