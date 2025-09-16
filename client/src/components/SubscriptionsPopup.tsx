@@ -23,13 +23,20 @@ const SubscriptionsPopup: React.FC = () => {
 
   if (!showSubscriptionsPopup) return null;
 
+  const nextMonth = (): string => {
+    const currentDate = new Date();
+    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    
+    return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(nextMonthDate);
+  };
+
   const planOptions: PlanOption[] = [
     {
       value: 'free',
       title: 'Free',
       price: '$ 0',
       description: '3 AI-generations',
-      details: 'Your limit will reset on June 1.',
+      details: `Your limit will reset on ${nextMonth()} 1.`,
       isCurrent: true
     },
     {
@@ -131,12 +138,12 @@ const SubscriptionsPopup: React.FC = () => {
 
           {/* Title */}
           <h2 className="text-2xl font-semibold text-gray-900 text-center mb-2">
-            You've reached your monthly limit
+            You've reached your generations limit
           </h2>
 
           {/* Subtitle */}
           <p className="text-sm text-center mb-4 px-4">
-            Upgrade to Pro to continue using SmartResume AI
+            Upgrade to Pro/Pro+ Plan to continue using SmartResume AI
           </p>
 
           {/* Plan options */}

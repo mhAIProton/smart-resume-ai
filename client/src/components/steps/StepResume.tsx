@@ -126,7 +126,7 @@ const StepResume: React.FC = () => {
             </div>
             <div className="w-full flex flex-col">
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900 mb-1">Generate from scratch</h3>
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">Generate from scratch</h3>
                 <p className="text-sm text-gray-500">Create a resume using your background and
                   skills</p>
               </div>
@@ -190,7 +190,7 @@ const StepResume: React.FC = () => {
             </div>
             <div className="w-full flex flex-col">
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900 mb-1">Improve my resume</h3>
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">Improve my resume</h3>
                 <p className="text-sm text-gray-500">Paste, upload or link to your current resume</p>
               </div>
 
@@ -297,7 +297,7 @@ const StepResume: React.FC = () => {
       <button
         onClick={selectedOption === 'generate' ? handleGenerateContinue : handleImproveContinue}
         disabled={!hasInput()}
-        className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+        className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-colors ${
           hasInput()
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'

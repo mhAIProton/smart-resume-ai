@@ -18,8 +18,7 @@ const StepResult: React.FC = () => {
     selectedDesign,
     user,
     setUser,
-    setShowMessagePopup,
-    setMessagePopupData
+    setShowSubscriptionsPopup
   } = useAppContext();
   const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);
@@ -36,17 +35,7 @@ const StepResult: React.FC = () => {
 
   // Функция для генерации контента
   const generateContent = async () => {
-    if (!isAuthenticated || !jobDescription || !generationType) {
-      return;
-    }
-
-    if (Number(user?.remainingGenerations) < 1) {
-      setMessagePopupData({
-        type: 'error',
-        title: 'Insufficient generations remaining',
-        subtitle: 'Please upgrade your plan to generate more content.',
-      });
-      setShowMessagePopup(true);
+    if (!isAuthenticated || Number(user?.remainingGenerations) < 1) {
       return;
     }
 
@@ -56,7 +45,7 @@ const StepResult: React.FC = () => {
       if (generationType === 'resume') {
         // Генерируем резюме
         const request = {
-          jobDescription: jobDescription.text,
+          jobDescription: jobDescription?.text,
           userExperience: resumeData?.option === 'generate' ? resumeData.generateText : undefined,
           existingResume: resumeData?.option === 'improve' ? resumeData.improveText : undefined,
           design: selectedDesign || 'classic'
@@ -66,7 +55,7 @@ const StepResult: React.FC = () => {
       } else {
         // Генерируем сопроводительное письмо
         const request = {
-          jobDescription: jobDescription.text,
+          jobDescription: jobDescription?.text,
           tone: selectedTone || 'formal'
         };
 
@@ -167,9 +156,14 @@ const StepResult: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-[72vh]">
         <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>You have no generations remaining.<br/> Please upgrade your plan to generate more content.</h3>
         <button
-          onClick={() => console.log('Upgrade Plan')}
-          className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          onClick={() => setShowSubscriptionsPopup(true)}
+          className="group h-11 w-1/2 flex items-center justify-center space-x-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
+          <img
+            src="/lock.svg"
+            alt="Lock"
+            className="h-6"
+          />
           <span className="font-medium">Upgrade Plan</span>
         </button>
       </div>
