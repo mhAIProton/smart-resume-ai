@@ -122,7 +122,7 @@ export const loadFromStorage = async (key: string): Promise<any> => {
   }
 };
 
-export const removeFromStorage = async (key: string): Promise<void> => {
+export const removeFromStorage = async (key: string | string[]): Promise<void> => {
   try {
     await storage.remove(key);
   } catch (error) {

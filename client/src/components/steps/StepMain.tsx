@@ -88,7 +88,7 @@ const StepMain: React.FC = () => {
       <button
         onClick={handleContinue}
         disabled={!isTextExist()}
-        className={clsx('w-full py-3 px-4 rounded-lg font-medium transition-colors', {
+        className={clsx('w-full py-3 px-4 rounded-lg font-medium text-sm transition-colors', {
           'bg-blue-200 text-white cursor-not-allowed': !isTextExist(),
           'bg-blue-600 hover:bg-blue-700 text-white': isTextExist(),
         })}
