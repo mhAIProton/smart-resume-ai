@@ -236,11 +236,11 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     const checkAuth = async () => {
         try {
             // Сначала проверяем, есть ли сохраненные данные пользователя
-            const savedUserData = await loadFromStorage(STORAGE_KEYS.USER_DATA);
-            if (savedUserData) {
-                await setUser(savedUserData);
-                return;
-            }
+            // const savedUserData = await loadFromStorage(STORAGE_KEYS.USER_DATA);
+            // if (savedUserData) {
+            //     await setUser(savedUserData);
+            //     return;
+            // }
 
             // Если нет сохраненных данных, проверяем токен
             const token = await loadFromStorage(STORAGE_KEYS.AUTH_TOKEN);
@@ -305,6 +305,27 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         };
         
         initializeApp();
+    }, []);
+
+    // Listen for messages from background script
+    useEffect(() => {
+        const handleMessage = (message: any, sender: any, sendResponse: any) => {
+            if (message.action === 'refreshUserData') {
+                checkAuth();
+            }
+        };
+
+        // Add message listener
+        if (chrome?.runtime?.onMessage) {
+            chrome.runtime.onMessage.addListener(handleMessage);
+        }
+
+        // Cleanup
+        return () => {
+            if (chrome?.runtime?.onMessage) {
+                chrome.runtime.onMessage.removeListener(handleMessage);
+            }
+        };
     }, []);
 
     return (

@@ -6,6 +6,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import fs from 'fs';
+import path from 'path';
 
 @ApiTags('openai')
 @Controller('openai')
@@ -34,8 +36,15 @@ export class OpenaiController {
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    const content = await this.openaiService.generateResume(request);
-    return { content };
+    // const content = await this.openaiService.generateResume(request);
+    // return { content };
+
+    // Читаем содержимое из resume-example.json
+    const filePath = path.join(process.cwd(), 'resume-example.json');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const resumeData = JSON.parse(fileContent);
+    
+    return { content: JSON.stringify(resumeData, null, 2) };
   }
 
   @Post('generate-cover-letter')

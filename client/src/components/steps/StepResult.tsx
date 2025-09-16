@@ -4,7 +4,7 @@ import { useAppContext, User } from '@/contexts/AppContextProvider';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
-import jsPDF from 'jspdf';
+import { pdfService, ResumeData, DesignType } from '@/services/pdf/pdfService';
 
 const StepResult: React.FC = () => {
   const { 
@@ -116,67 +116,38 @@ const StepResult: React.FC = () => {
         return;
       }
 
-      // Создаем новый PDF документ
-      const pdf = new jsPDF();
-      
-      // Настройки шрифта и размера
-      const fontSize = 10;
-      const lineHeight = fontSize * 0.4;
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      const maxWidth = pageWidth - (margin * 2);
-      
-      // Разбиваем текст на строки
-      const lines = pdf.splitTextToSize(content, maxWidth);
-      
-      let yPosition = margin;
-      let currentPage = 1;
-      
-      // Добавляем заголовок
-      const title = generationType === 'resume' ? 'Resume' : 'Cover Letter';
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(title, margin, yPosition);
-      yPosition += 15;
-      
-      // Добавляем дату
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
-      const currentDate = new Date().toLocaleDateString();
-      pdf.text(`Generated on: ${currentDate}`, margin, yPosition);
-      yPosition += 10;
-      
-      // Добавляем разделительную линию
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 10;
-      
-      // Добавляем основной контент
-      pdf.setFontSize(fontSize);
-      pdf.setFont('helvetica', 'normal');
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        
-        // Проверяем, помещается ли строка на текущей странице
-        if (yPosition + lineHeight > pageHeight - margin) {
-          pdf.addPage();
-          currentPage++;
-          yPosition = margin;
+      if (generationType === 'resume') {
+        // Парсим JSON данные для резюме
+        let resumeData: ResumeData;
+        try {
+          resumeData = JSON.parse(content);
+        } catch (parseError) {
+          console.error('Failed to parse resume JSON:', parseError);
+          toast.error('Invalid resume data format');
+          return;
         }
+
+        // Генерируем PDF используя pdfService
+        const design = (selectedDesign || 'classic') as DesignType;
+        pdfService.generatePDF(resumeData, design);
         
-        // Добавляем строку
-        pdf.text(line, margin, yPosition);
-        yPosition += lineHeight;
+        // Генерируем имя файла
+        const timestamp = new Date().toISOString().split('T')[0];
+        const fileName = `resume_${timestamp}.pdf`;
+        
+        // Скачиваем PDF
+        pdfService.downloadPDF(fileName);
+      } else {
+        // Для cover letter используем pdfService
+        pdfService.generateCoverLetterPDF(content);
+        
+        // Генерируем имя файла
+        const timestamp = new Date().toISOString().split('T')[0];
+        const fileName = `cover-letter_${timestamp}.pdf`;
+        
+        // Скачиваем PDF
+        pdfService.downloadPDF(fileName);
       }
-      
-      // Генерируем имя файла
-      const timestamp = new Date().toISOString().split('T')[0];
-      const fileName = `${generationType === 'resume' ? 'resume' : 'cover-letter'}_${timestamp}.pdf`;
-      
-      // Скачиваем PDF
-      pdf.save(fileName);
       
       toast.success('PDF downloaded successfully!');
     } catch (error) {

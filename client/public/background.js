@@ -7,12 +7,13 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // Handle action button click
 chrome.action.onClicked.addListener((tab) => {
-  console.log('Action button clicked for tab:', tab.id)
-  
+  console.log('Action button clicked for tab:', tab.id);
+
   // Try to open side panel if supported
   if (chrome.sidePanel && chrome.sidePanel.open) {
     try {
-      chrome.sidePanel.open({ windowId: tab.windowId })
+      chrome.sidePanel.open({ windowId: tab.windowId });
+      chrome.runtime.sendMessage({ action: 'refreshUserData' });
     } catch (error) {
       console.error('Error opening side panel:', error)
     }
@@ -140,6 +141,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case 'test':
       sendResponse({ status: 'ok' });
+      break;
+      
+    case 'openSidePanel':
+      // Open side panel and request user data
+      if (chrome.sidePanel && chrome.sidePanel.open) {
+        try {
+          chrome.sidePanel.open({ windowId: sender.tab.windowId });
+          chrome.runtime.sendMessage({ action: 'refreshUserData' });
+          sendResponse({ success: true });
+        } catch (error) {
+          console.error('Error opening side panel:', error);
+          sendResponse({ success: false, error: error.message });
+        }
+      } else {
+        sendResponse({ success: false, error: 'Side panel not available' });
+      }
       break;
       
     case 'googleAuth':

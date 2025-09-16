@@ -16,6 +16,6 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'smart_resume_ai',
   entities: [User, Order, Generation],
   migrations: ['src/migrations/*.ts'],
-  synchronize: false,
+  synchronize: process.env.NODE_ENV === 'development' ? true : false,
   logging: true,
 });
