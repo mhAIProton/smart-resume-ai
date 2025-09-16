@@ -248,7 +248,7 @@ const StepResult: React.FC = () => {
           className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
           <Download className="w-4 h-4 group-hover:animate-pulse" />
-          <span className="font-medium">Download PDF</span>
+          <span className="text-sm font-medium">Download PDF</span>
         </button>
 
         {/* Start New button */}
@@ -256,7 +256,7 @@ const StepResult: React.FC = () => {
           onClick={handleStartNew}
           className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <span className="font-medium">Start New Generation</span>
+          <span className="text-sm font-medium">Start New Generation</span>
         </button>
       </div>
     </div>

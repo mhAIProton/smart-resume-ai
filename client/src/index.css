@@ -31,7 +31,7 @@ body {
 }
 
 .draft-container {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 420px);
 }
 
 /* Custom scrollbar */

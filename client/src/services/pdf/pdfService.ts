@@ -72,72 +72,99 @@ class PDFService {
     this.currentY = this.margin;
   }
 
+  private addCurrentY(value: number): void {
+    this.currentY += value;
+
+    if (this.currentY > this.pageHeight - this.margin) {
+      this.pdf.addPage();
+      this.currentY = this.margin;
+    }
+  }
+
   // Классический дизайн
   private generateClassicDesign(resumeData: ResumeData): void {
     // Заголовок
-    this.pdf.setFontSize(20);
-    this.pdf.setFont("helvetica", "bold");
+    this.pdf.setFontSize(16);
+    this.pdf.setFont("helvetica", "normal");
     this.pdf.text(resumeData.full_name, this.margin, this.currentY);
-    this.currentY += 10;
+    this.addCurrentY(8);
 
-    this.pdf.setFontSize(14);
+    this.pdf.setFontSize(18);
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(resumeData.profession, this.margin, this.currentY);
-    this.currentY += 15;
+    this.addCurrentY(8);
 
     // Контакты
-    this.addSectionHeader("CONTACT INFORMATION");
     this.pdf.setFontSize(10);
+    this.pdf.setFont("helvetica", "normal");
     this.pdf.text(`Email: ${resumeData.contacts.email}`, this.margin, this.currentY);
-    this.currentY += 6;
+    this.addCurrentY(6);
     this.pdf.text(`Phone: ${resumeData.contacts.phone}`, this.margin, this.currentY);
-    this.currentY += 6;
+    this.addCurrentY(6);
     this.pdf.text(`Portfolio: ${resumeData.contacts.portfolio}`, this.margin, this.currentY);
-    this.currentY += 15;
+    this.addCurrentY(15);
 
     // Профессиональное резюме
-    this.addSectionHeader("PROFESSIONAL SUMMARY");
+    this.pdf.setFontSize(18);
+    this.pdf.setFont("helvetica", "normal");
+    this.pdf.text('Profile', this.margin, this.currentY);
+    this.addCurrentY(8);
     this.addWrappedText(resumeData.summary, 10);
-    this.currentY += 10;
+    this.addCurrentY(8);
 
     // Навыки
-    this.addSectionHeader("SKILLS");
+    this.pdf.setFontSize(18);
+    this.pdf.setFont("helvetica", "normal");
+    this.pdf.text('Skills', this.margin, this.currentY);
+    this.addCurrentY(8);
     this.addSkillsList(resumeData.skills);
-    this.currentY += 10;
+    this.addCurrentY(8);
 
     // Опыт работы
-    this.addSectionHeader("PROFESSIONAL EXPERIENCE");
+    this.pdf.setFontSize(18);
+    this.pdf.setFont("helvetica", "normal");
+    this.pdf.text('Experience', this.margin, this.currentY);
+    this.addCurrentY(8);
     resumeData.experience.forEach(exp => {
       this.addExperienceItem(exp);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Образование
-    this.addSectionHeader("EDUCATION");
+    this.pdf.setFontSize(18);
+    this.pdf.setFont("helvetica", "normal");
+    this.pdf.text('Education', this.margin, this.currentY);
+    this.addCurrentY(8);
     resumeData.education.forEach(edu => {
       this.addEducationItem(edu);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Дополнительная информация
     if (resumeData.additional.length > 0) {
-      this.addSectionHeader("ADDITIONAL INFORMATION");
-      resumeData.additional.forEach(add => {
-        if (add.languages) {
-          this.pdf.setFontSize(10);
-          this.pdf.text(`Languages: ${add.languages}`, this.margin, this.currentY);
-          this.currentY += 6;
-        }
-        if (add.tools) {
-          this.pdf.text(`Tools: ${add.tools}`, this.margin, this.currentY);
-          this.currentY += 6;
-        }
-        if (add.certificates) {
-          this.pdf.text(`Certificates: ${add.certificates}`, this.margin, this.currentY);
-          this.currentY += 6;
-        }
-      });
+        this.pdf.setFontSize(18);
+        this.pdf.setFont("helvetica", "normal");
+        this.pdf.text('Additional', this.margin, this.currentY);
+        this.addCurrentY(8);
+
+        resumeData.additional.forEach(add => {
+            if (add.languages) {
+            this.pdf.setFontSize(10);
+            this.pdf.text(`Languages: ${add.languages}`, this.margin, this.currentY);
+            this.addCurrentY(6);
+            }
+            if (add.tools) {
+            this.pdf.text(`Tools: ${add.tools}`, this.margin, this.currentY);
+            this.addCurrentY(6);
+            }
+            if (add.certificates) {
+            this.pdf.text(`Certificates: ${add.certificates}`, this.margin, this.currentY);
+            this.addCurrentY(6);
+            }
+        });
     }
+
+    this.downloadPDF();
   }
 
   // Современный дизайн
@@ -161,35 +188,35 @@ class PDFService {
 
     // Контакты в две колонки
     this.pdf.setFontSize(9);
-    this.pdf.text(`📧 ${resumeData.contacts.email}`, this.margin, this.currentY);
-    this.pdf.text(`📱 ${resumeData.contacts.phone}`, this.pageWidth / 2, this.currentY);
-    this.currentY += 6;
-    this.pdf.text(`🔗 ${resumeData.contacts.portfolio}`, this.margin, this.currentY);
-    this.currentY += 15;
+    this.pdf.text(`${resumeData.contacts.email}`, this.margin, this.currentY);
+    this.pdf.text(`${resumeData.contacts.phone}`, this.pageWidth / 2, this.currentY);
+    this.addCurrentY(6);
+    this.pdf.text(`${resumeData.contacts.portfolio}`, this.margin, this.currentY);
+    this.addCurrentY(15);
 
     // Профессиональное резюме
     this.addModernSectionHeader("PROFESSIONAL SUMMARY");
     this.addWrappedText(resumeData.summary, 10);
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Навыки с иконками
     this.addModernSectionHeader("SKILLS");
     this.addModernSkillsList(resumeData.skills);
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Опыт работы
     this.addModernSectionHeader("PROFESSIONAL EXPERIENCE");
     resumeData.experience.forEach(exp => {
       this.addModernExperienceItem(exp);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Образование
     this.addModernSectionHeader("EDUCATION");
     resumeData.education.forEach(edu => {
       this.addModernEducationItem(edu);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Дополнительная информация
     if (resumeData.additional.length > 0) {
@@ -197,19 +224,21 @@ class PDFService {
       resumeData.additional.forEach(add => {
         if (add.languages) {
           this.pdf.setFontSize(10);
-          this.pdf.text(`🌐 Languages: ${add.languages}`, this.margin, this.currentY);
-          this.currentY += 6;
+          this.pdf.text(`Languages: ${add.languages}`, this.margin, this.currentY);
+          this.addCurrentY(6);
         }
         if (add.tools) {
-          this.pdf.text(`🛠️ Tools: ${add.tools}`, this.margin, this.currentY);
-          this.currentY += 6;
+          this.pdf.text(`Tools: ${add.tools}`, this.margin, this.currentY);
+          this.addCurrentY(6);
         }
         if (add.certificates) {
-          this.pdf.text(`📜 Certificates: ${add.certificates}`, this.margin, this.currentY);
-          this.currentY += 6;
+          this.pdf.text(`Certificates: ${add.certificates}`, this.margin, this.currentY);
+          this.addCurrentY(6);
         }
       });
     }
+
+    this.downloadPDF();
   }
 
   // Минималистичный дизайн
@@ -218,49 +247,49 @@ class PDFService {
     this.pdf.setFontSize(16);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(resumeData.full_name, this.margin, this.currentY);
-    this.currentY += 8;
+    this.addCurrentY(8);
 
     this.pdf.setFontSize(12);
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(resumeData.profession, this.margin, this.currentY);
-    this.currentY += 12;
+    this.addCurrentY(12);
 
     // Тонкая линия
     this.pdf.setLineWidth(0.5);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Контакты
     this.pdf.setFontSize(9);
     this.pdf.text(resumeData.contacts.email, this.margin, this.currentY);
     this.pdf.text(resumeData.contacts.phone, this.pageWidth / 2, this.currentY);
-    this.currentY += 5;
+    this.addCurrentY(5);
     this.pdf.text(resumeData.contacts.portfolio, this.margin, this.currentY);
-    this.currentY += 15;
+    this.addCurrentY(15);
 
     // Профессиональное резюме
     this.addMinimalSectionHeader("SUMMARY");
     this.addWrappedText(resumeData.summary, 9);
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Навыки
     this.addMinimalSectionHeader("SKILLS");
     this.addMinimalSkillsList(resumeData.skills);
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Опыт работы
     this.addMinimalSectionHeader("EXPERIENCE");
     resumeData.experience.forEach(exp => {
       this.addMinimalExperienceItem(exp);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Образование
     this.addMinimalSectionHeader("EDUCATION");
     resumeData.education.forEach(edu => {
       this.addMinimalEducationItem(edu);
     });
-    this.currentY += 10;
+    this.addCurrentY(10);
 
     // Дополнительная информация
     if (resumeData.additional.length > 0) {
@@ -269,18 +298,20 @@ class PDFService {
         if (add.languages) {
           this.pdf.setFontSize(9);
           this.pdf.text(`Languages: ${add.languages}`, this.margin, this.currentY);
-          this.currentY += 5;
+          this.addCurrentY(5);
         }
         if (add.tools) {
           this.pdf.text(`Tools: ${add.tools}`, this.margin, this.currentY);
-          this.currentY += 5;
+          this.addCurrentY(5);
         }
         if (add.certificates) {
           this.pdf.text(`Certificates: ${add.certificates}`, this.margin, this.currentY);
-          this.currentY += 5;
+          this.addCurrentY(5);
         }
       });
     }
+
+    this.downloadPDF();
   }
 
   // Вспомогательные методы для классического дизайна
@@ -288,20 +319,21 @@ class PDFService {
     this.pdf.setFontSize(12);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(title, this.margin, this.currentY);
-    this.currentY += 8;
+    this.addCurrentY(8);
     
     // Подчеркивание
     this.pdf.setLineWidth(0.5);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.currentY += 5;
+    this.addCurrentY(5);
   }
 
   private addWrappedText(text: string, fontSize: number): void {
     this.pdf.setFontSize(fontSize);
     this.pdf.setFont("helvetica", "normal");
+
     const lines = this.pdf.splitTextToSize(text, this.pageWidth - (this.margin * 2));
     this.pdf.text(lines, this.margin, this.currentY);
-    this.currentY += lines.length * (fontSize * 0.4) + 5;
+    this.addCurrentY(lines.length * fontSize * 0.4 + 5);
   }
 
   private addSkillsList(skills: string[]): void {
@@ -310,33 +342,33 @@ class PDFService {
     const skillsText = skills.join(" • ");
     const lines = this.pdf.splitTextToSize(skillsText, this.pageWidth - (this.margin * 2));
     this.pdf.text(lines, this.margin, this.currentY);
-    this.currentY += lines.length * 4 + 5;
+    this.addCurrentY(lines.length * 4 + 5);
   }
 
   private addExperienceItem(exp: any): void {
     this.pdf.setFontSize(11);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(exp.job_title, this.margin, this.currentY);
-    this.currentY += 5;
+    this.addCurrentY(5);
 
     this.pdf.setFontSize(10);
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(`${exp.company} | ${exp.dates}`, this.margin, this.currentY);
-    this.currentY += 8;
+    this.addCurrentY(8);
 
     this.addWrappedText(exp.description, 9);
-    this.currentY += 5;
+    this.addCurrentY(5);
   }
 
   private addEducationItem(edu: any): void {
     this.pdf.setFontSize(10);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(edu.degree, this.margin, this.currentY);
-    this.currentY += 5;
+    this.addCurrentY(5);
 
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(`${edu.institution} | ${edu.dates}`, this.margin, this.currentY);
-    this.currentY += 8;
+    this.addCurrentY(8);
   }
 
   // Вспомогательные методы для современного дизайна
@@ -346,7 +378,7 @@ class PDFService {
     this.pdf.setTextColor(41, 128, 185);
     this.pdf.text(title, this.margin, this.currentY);
     this.pdf.setTextColor(0, 0, 0);
-    this.currentY += 8;
+    this.addCurrentY(8);
   }
 
   private addModernSkillsList(skills: string[]): void {
@@ -355,37 +387,37 @@ class PDFService {
     const skillsText = skills.join(" • ");
     const lines = this.pdf.splitTextToSize(skillsText, this.pageWidth - (this.margin * 2));
     this.pdf.text(lines, this.margin, this.currentY);
-    this.currentY += lines.length * 3.5 + 5;
+    this.addCurrentY(lines.length * 3.5 + 5);
   }
 
   private addModernExperienceItem(exp: any): void {
     this.pdf.setFontSize(10);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(exp.job_title, this.margin, this.currentY);
-    this.currentY += 4;
+    this.addCurrentY(4);
 
     this.pdf.setFontSize(9);
     this.pdf.setFont("helvetica", "normal");
     this.pdf.setTextColor(100, 100, 100);
     this.pdf.text(`${exp.company} | ${exp.dates}`, this.margin, this.currentY);
     this.pdf.setTextColor(0, 0, 0);
-    this.currentY += 6;
+    this.addCurrentY(6);
 
     this.addWrappedText(exp.description, 9);
-    this.currentY += 5;
+    this.addCurrentY(5);
   }
 
   private addModernEducationItem(edu: any): void {
     this.pdf.setFontSize(9);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(edu.degree, this.margin, this.currentY);
-    this.currentY += 4;
+    this.addCurrentY(4);
 
     this.pdf.setFont("helvetica", "normal");
     this.pdf.setTextColor(100, 100, 100);
     this.pdf.text(`${edu.institution} | ${edu.dates}`, this.margin, this.currentY);
     this.pdf.setTextColor(0, 0, 0);
-    this.currentY += 6;
+    this.addCurrentY(6);
   }
 
   // Вспомогательные методы для минималистичного дизайна
@@ -393,7 +425,7 @@ class PDFService {
     this.pdf.setFontSize(10);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(title.toUpperCase(), this.margin, this.currentY);
-    this.currentY += 6;
+    this.addCurrentY(6);
   }
 
   private addMinimalSkillsList(skills: string[]): void {
@@ -402,33 +434,33 @@ class PDFService {
     const skillsText = skills.join(" • ");
     const lines = this.pdf.splitTextToSize(skillsText, this.pageWidth - (this.margin * 2));
     this.pdf.text(lines, this.margin, this.currentY);
-    this.currentY += lines.length * 3 + 5;
+    this.addCurrentY(lines.length * 3 + 5);
   }
 
   private addMinimalExperienceItem(exp: any): void {
     this.pdf.setFontSize(9);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(exp.job_title, this.margin, this.currentY);
-    this.currentY += 4;
+    this.addCurrentY(4);
 
     this.pdf.setFontSize(8);
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(`${exp.company} | ${exp.dates}`, this.margin, this.currentY);
-    this.currentY += 6;
+    this.addCurrentY(6);
 
     this.addWrappedText(exp.description, 8);
-    this.currentY += 3;
+    this.addCurrentY(3);
   }
 
   private addMinimalEducationItem(edu: any): void {
     this.pdf.setFontSize(8);
     this.pdf.setFont("helvetica", "bold");
     this.pdf.text(edu.degree, this.margin, this.currentY);
-    this.currentY += 4;
+    this.addCurrentY(4);
 
     this.pdf.setFont("helvetica", "normal");
     this.pdf.text(`${edu.institution} | ${edu.dates}`, this.margin, this.currentY);
-    this.currentY += 6;
+    this.addCurrentY(6);
   }
 
   // Метод для генерации PDF cover letter
@@ -441,19 +473,19 @@ class PDFService {
     this.pdf.setFontSize(16);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text('Cover Letter', this.margin, this.currentY);
-    this.currentY += 15;
+    this.addCurrentY(15);
     
     // Добавляем дату
     this.pdf.setFontSize(8);
     this.pdf.setFont('helvetica', 'normal');
     const currentDate = new Date().toLocaleDateString();
     this.pdf.text(`Generated on: ${currentDate}`, this.margin, this.currentY);
-    this.currentY += 10;
+    this.addCurrentY(10);
     
     // Добавляем разделительную линию
     this.pdf.setLineWidth(0.5);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.currentY += 10;
+    this.addCurrentY(10);
     
     // Добавляем основной контент используя существующий метод
     this.addWrappedText(content, 10);
