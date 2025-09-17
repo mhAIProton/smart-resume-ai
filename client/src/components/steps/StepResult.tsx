@@ -5,6 +5,7 @@ import { useNavigation } from '@/contexts/NavigationContext';
 import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
 import { pdfService, ResumeData, DesignType } from '@/services/pdf/pdfService';
+import ResumeDisplay from '@/components/ResumeDisplay';
 
 const StepResult: React.FC = () => {
   const { 
@@ -26,6 +27,57 @@ const StepResult: React.FC = () => {
   
   const generateResume = useGenerateResume();
   const generateCoverLetter = useGenerateCoverLetter();
+
+  const json = {
+    "full_name": "Alexandra Ivanova",
+    "profession": "Product / UI/UX Designer",
+    "summary": "Product designer with 4+ years of experience building digital products from discovery to delivery. Specialized in mobile and web interfaces with a strong focus on user needs and business goals. Experienced in startups, marketplaces, and e-commerce. Proficient in Figma, UX research, and MVP-first approach.",
+    "contacts": {
+      "email": "alexa.ivanova@gmail.com",
+      "phone": "+7 707 123 45 67",
+      "portfolio": "linkedin.com/in/alex-ivanova"
+    },
+    "skills": ["Figma", "UX Research", "Design Systems", "Prototyping", "User Flows / CJM", "Web / Mobile Design", "Wireframing", "User Interviews", "Notion", "FigJam"],
+    "experience": [
+      {
+        "job_title": "Product Designer",
+        "company": "Wildberries Tech",
+        "dates": "2022–2024",
+        "description": "Designed seller dashboard (increased conversion by 12%)\nConducted 10+ user interviews for storefront redesign\nContributed to internal design system for B2B tools\nWorked closely with PMs and frontend/backend teams"
+      },
+      {
+        "job_title": "Middle+ Product Designer",
+        "company": "Yandex.Market",
+        "dates": "2021–2022",
+        "description": "Participated in redesign of product catalog and search filters\nWorked on mobile-first improvements for checkout flow\nCollaborated with analysts to improve user funnel\nTook part in weekly design critiques and sprints"
+      },
+      {
+        "job_title": "Freelance",
+        "company": "Jamb App",
+        "dates": "2020–2021",
+        "description": "Created mobile interface for Canadian home repair service\nDesigned order flow, filters, product cards, and questionnaires\nApplied atomic design principles for scalable UI\nDelivered a clickable prototype for investor pitch"
+      }
+    ],
+    "education": [
+      {
+        "degree": "UX/UI Design",
+        "institution": "British Higher School of Art and Design",
+        "dates": "2020–2021"
+      },
+      {
+        "degree": "Bachelor’s Degree | Economics",
+        "institution": "Lomonosov Moscow State University",
+        "dates": "2015–2019"
+      }
+    ],
+    "additional": [
+      {
+        "languages": "Russian (native), English (B2)",
+        "tools": "Figma, FigJam, Notion, Miro, Trello, Slack",
+        "certificates": "Google UX Design (Coursera, 2023)"
+      }
+    ]
+  };
 
   // Проверяем авторизацию при загрузке компонента
   useEffect(() => {
@@ -98,7 +150,8 @@ const StepResult: React.FC = () => {
 
   const handleDownloadPDF = () => {
     try {
-      const content = getGeneratedContent();
+      // const content = getGeneratedContent();
+      const content = JSON.stringify(json); // remove dev code
       
       if (!content || content === 'Your draft will appear here...') {
         toast.error('No content to download');
@@ -215,7 +268,7 @@ const StepResult: React.FC = () => {
       <div className="mb-6">
         <div className="draft-container bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-y-auto">
           <div className="whitespace-pre-line text-sm text-gray-800 font-mono leading-relaxed">
-            {getGeneratedContent()}
+            <ResumeDisplay resumeData={json} design={selectedDesign || 'classic'} />
           </div>
         </div>
       </div>
