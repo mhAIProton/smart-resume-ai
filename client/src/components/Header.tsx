@@ -91,7 +91,7 @@ const Header: React.FC = () => {
             className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-8 hover:bg-gray-200 transition-colors"
           >
               <span className="text-xs text-gray-700">
-                <b>{user?.remainingGenerations || 0}</b>/<b>{user?.totalGenerations || 3}</b> AI-generations
+                <b>{isAuthenticated ? Number(user?.remainingGenerations) : 3}</b>/<b>{isAuthenticated ? Number(user?.totalGenerations) : 3}</b> AI-generations
               </span>
           </button>
         </div>

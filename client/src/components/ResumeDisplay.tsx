@@ -19,15 +19,15 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       <div className="mb-6">
         <div className="flex items-center mb-2">
           <img src="/icons/pdf-mail.png" alt="Email" className="w-4 h-4 mr-2" />
-          <span className="text-sm text-gray-600">{resumeData.contacts.email}</span>
+          <span className="text-sm text-gray-600">{resumeData.contacts?.email}</span>
         </div>
         <div className="flex items-center mb-2">
           <img src="/icons/pdf-phone.png" alt="Phone" className="w-4 h-4 mr-2" />
-          <span className="text-sm text-gray-600">{resumeData.contacts.phone}</span>
+          <span className="text-sm text-gray-600">{resumeData.contacts?.phone}</span>
         </div>
         <div className="flex items-center mb-2">
           <img src="/icons/pdf-link.png" alt="Portfolio" className="w-4 h-4 mr-2" />
-          <span className="text-sm text-gray-600">{resumeData.contacts.portfolio}</span>
+          <span className="text-sm text-gray-600">{resumeData.contacts?.portfolio}</span>
         </div>
       </div>
 
@@ -41,7 +41,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Skills</h3>
         <div className="flex flex-wrap gap-2">
-          {resumeData.skills.map((skill, index) => (
+          {resumeData.skills?.map((skill, index) => (
             <span
               key={index}
               className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700"
@@ -55,7 +55,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       {/* Experience */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Experience</h3>
-        {resumeData.experience.map((exp, index) => (
+        {resumeData.experience?.map((exp, index) => (
           <div key={index} className="mb-4">
             <h4 className="text-base font-semibold text-gray-900">{exp.job_title}</h4>
             <p className="text-sm text-gray-600">{exp.company}</p>
@@ -78,10 +78,10 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       </div>
 
       {/* Additional */}
-      {resumeData.additional.length > 0 && (
+      {resumeData.additional?.length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional</h3>
-          {resumeData.additional.map((add, index) => (
+          {resumeData.additional?.map((add, index) => (
             <div key={index}>
               {add.languages && (
                 <div className="mb-2">
@@ -145,15 +145,15 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
           <div className="mb-6">
             <div className="flex items-center mb-2">
               <img src="/icons/pdf-mail.png" alt="Email" className="w-4 h-4 mr-2" />
-              <span className="text-xs text-gray-600">{resumeData.contacts.email}</span>
+              <span className="text-xs text-gray-600">{resumeData.contacts?.email}</span>
             </div>
             <div className="flex items-center mb-2">
               <img src="/icons/pdf-phone.png" alt="Phone" className="w-4 h-4 mr-2" />
-              <span className="text-xs text-gray-600">{resumeData.contacts.phone}</span>
+              <span className="text-xs text-gray-600">{resumeData.contacts?.phone}</span>
             </div>
             <div className="flex items-center mb-2">
               <img src="/icons/pdf-link.png" alt="Portfolio" className="w-4 h-4 mr-2" />
-              <span className="text-xs text-gray-600">{resumeData.contacts.portfolio}</span>
+              <span className="text-xs text-gray-600">{resumeData.contacts?.portfolio}</span>
             </div>
           </div>
 
@@ -161,7 +161,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
           <div className="mb-6">
             <h3 className="text-lg font-normal text-green-600 mb-2">Skills</h3>
             <div className="flex flex-wrap gap-1">
-              {resumeData.skills.map((skill, index) => (
+              {resumeData.skills?.map((skill, index) => (
                 <span
                   key={index}
                   className="inline-block px-2 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700"
@@ -175,7 +175,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
           {/* Education */}
           <div className="mb-6">
             <h3 className="text-lg font-normal text-green-600 mb-2">Education</h3>
-            {resumeData.education.map((edu, index) => (
+            {resumeData.education?.map((edu, index) => (
               <div key={index} className="mb-3">
                 <h4 className="text-sm font-semibold text-gray-900">{edu.degree}</h4>
                 <p className="text-xs text-gray-600">{edu.institution}</p>
@@ -188,10 +188,10 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
           </div>
 
           {/* Additional */}
-          {resumeData.additional.length > 0 && (
+          {resumeData.additional?.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-normal text-green-600 mb-2">Additional</h3>
-              {resumeData.additional.map((add, index) => (
+              {resumeData.additional?.map((add, index) => (
                 <div key={index}>
                   {add.languages && (
                     <div className="mb-2">
@@ -234,7 +234,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       {/* Contacts */}
       <div className="mb-6">
         <p className="text-sm text-gray-600">
-          {resumeData.contacts.email}  |  {resumeData.contacts.phone}  |  {resumeData.contacts.portfolio}
+          {resumeData.contacts?.email}  |  {resumeData.contacts?.phone}  |  {resumeData.contacts?.portfolio}
         </p>
       </div>
 
@@ -268,7 +268,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       {/* Education */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Education</h3>
-        {resumeData.education.map((edu, index) => (
+        {resumeData.education?.map((edu, index) => (
           <div key={index} className="mb-3">
             <h4 className="text-sm font-semibold text-gray-900">{edu.degree}</h4>
             <p className="text-sm text-gray-600">{edu.institution}</p>
@@ -278,10 +278,10 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
       </div>
 
       {/* Additional */}
-      {resumeData.additional.length > 0 && (
+      {resumeData.additional?.length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Additional</h3>
-          {resumeData.additional.map((add, index) => (
+          {resumeData.additional?.map((add, index) => (
             <div key={index}>
               {add.languages && (
                 <div className="mb-2">
@@ -309,6 +309,8 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData, design }) => 
   );
 
   const renderDesign = () => {
+    if (Object.keys(resumeData).length === 0) return null;
+
     switch (design) {
       case 'classic':
         return renderClassicDesign();
