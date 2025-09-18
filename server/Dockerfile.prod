@@ -23,6 +23,8 @@ RUN npm install --only=production
 COPY --from=development /usr/src/app/dist ./dist
 COPY --from=development /usr/src/app/package.json ./
 COPY --from=development /usr/src/app/.env.local ./
+COPY --from=development /usr/src/app/resume_prompt.txt ./
+COPY --from=development /usr/src/app/cover_letter_prompt.txt ./
 # Копируем папку database
 COPY --from=development /usr/src/app/src/database ./src/database
 # Копируем миграции
