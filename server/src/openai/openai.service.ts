@@ -27,6 +27,7 @@ export class OpenaiService {
   constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+      timeout: 120000,
     });
   }
 
