@@ -23,7 +23,9 @@ const StepResult: React.FC = () => {
   } = useAppContext();
   const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
+  const [content, setContent] = useState<ResumeData>({} as ResumeData);
   
   const generateResume = useGenerateResume();
   const generateCoverLetter = useGenerateCoverLetter();
@@ -104,6 +106,10 @@ const StepResult: React.FC = () => {
         };
 
         content = await generateResume.execute(request);
+        if (content) {
+          const parsedContent = JSON.parse(content) as ResumeData;
+          setContent(parsedContent);
+        }
       } else {
         // Генерируем сопроводительное письмо
         const request = {
@@ -116,11 +122,9 @@ const StepResult: React.FC = () => {
 
       if (content) {
         setGeneratedContent(content);
+        setIsGenerated(true);
+        setUser({ ...user, remainingGenerations: Math.max(0, Number(user?.remainingGenerations) - 1)} as User);
         toast.success('Content generated successfully!');
-        setUser({
-          ...user, 
-          remainingGenerations: Math.max(0, Number(user?.remainingGenerations) - 1)
-        } as User);
       }
     } catch (error) {
       console.error('Generation error:', error);
@@ -150,8 +154,7 @@ const StepResult: React.FC = () => {
 
   const handleDownloadPDF = () => {
     try {
-      // const content = getGeneratedContent();
-      const content = JSON.stringify(json); // remove dev code
+      const content = getGeneratedContent();
       
       if (!content || content === 'Your draft will appear here...') {
         toast.error('No content to download');
@@ -204,7 +207,7 @@ const StepResult: React.FC = () => {
     navigate('main');
   };
 
-  if (Number(user?.remainingGenerations) < 1) {
+  if (!isGenerated && Number(user?.remainingGenerations) < 1) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
         <h3 className='font-medium mb-4 text-red-500 px-8 text-center'>You have no generations remaining.<br/> Please upgrade your plan to generate more content.</h3>
@@ -268,7 +271,7 @@ const StepResult: React.FC = () => {
       <div className="mb-6">
         <div className="draft-container bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-y-auto">
           <div className="whitespace-pre-line text-sm text-gray-800 font-mono leading-relaxed">
-            <ResumeDisplay resumeData={json} design={selectedDesign || 'classic'} />
+            <ResumeDisplay resumeData={content} design={selectedDesign || 'classic'} />
           </div>
         </div>
       </div>
