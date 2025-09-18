@@ -30,10 +30,11 @@ export class OpenaiController {
       throw new ForbiddenException('Insufficient generations remaining');
     }
 
+    const content = await this.openaiService.generateResume(request);
+
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    const content = await this.openaiService.generateResume(request);
     return { content };
 
     // Читаем содержимое из resume-example.json
@@ -55,10 +56,11 @@ export class OpenaiController {
       throw new ForbiddenException('Insufficient generations remaining');
     }
 
+    const content = await this.openaiService.generateCoverLetter(request);
+
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    const content = await this.openaiService.generateCoverLetter(request);
     return { content };
   }
 

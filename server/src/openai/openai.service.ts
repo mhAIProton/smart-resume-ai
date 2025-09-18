@@ -6,7 +6,8 @@ import pdfParse from 'pdf-parse';
 import fs from 'fs';
 import path from 'path';
 
-const GPT_MODEL = 'gpt-4-turbo';
+const GPT_MODEL = 'gpt-4o-mini';
+// const GPT_MODEL = 'gpt-4'; // prod
 
 export interface GenerateResumeRequest {
   jobDescription: string;

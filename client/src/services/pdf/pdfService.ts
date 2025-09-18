@@ -37,6 +37,7 @@ class PDFService {
   private pageHeight: number;
   private margin: number;
   private currentY: number;
+  private fontFamily: string = 'helvetica';
 
   constructor() {
     this.pdf = new jsPDF();
@@ -98,7 +99,7 @@ class PDFService {
 
     // Контакты
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.addImage('/icons/pdf-mail.png', 'PNG', this.margin, this.currentY - 4, 5, 5);
     this.pdf.text(resumeData.contacts.email, this.margin + 7, this.currentY);
     this.addCurrentY(6);
@@ -138,25 +139,25 @@ class PDFService {
       resumeData.additional.forEach(add => {
         if (add.languages) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.languages, this.margin + this.pdf.getTextWidth("Languages:") + 3, this.currentY);
           this.addCurrentY(6);
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.tools, this.margin + this.pdf.getTextWidth("Tools:") + 3, this.currentY);
           this.addCurrentY(6);
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.certificates, this.margin + this.pdf.getTextWidth("Certificates:") + 3, this.currentY);
           this.addCurrentY(6);
         }
@@ -184,7 +185,7 @@ class PDFService {
 
     // ЛЕВАЯ КОЛОНКА - Имя и профессия
     this.pdf.setFontSize(16);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(resumeData.full_name, this.margin, this.margin + 10);
     
     this.pdf.setFontSize(18);
@@ -208,7 +209,7 @@ class PDFService {
     // ПРАВАЯ КОЛОНКА - Контакты с иконками
     this.currentY = this.margin + 8;
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.addImage('/icons/pdf-mail.png', 'PNG', rightColumnStart, this.currentY - 4, 5, 5);
     this.pdf.text(resumeData.contacts.email, rightColumnStart + 7, this.currentY);
     this.addCurrentY(6);
@@ -244,25 +245,25 @@ class PDFService {
       resumeData.additional.forEach(add => {
         if (add.languages) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", rightColumnStart, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.addCurrentY(5);
           this.addWrappedText(add.languages, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", rightColumnStart, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.addCurrentY(5);
           this.addWrappedText(add.tools, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", rightColumnStart, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.addCurrentY(5);
           this.addWrappedText(add.certificates, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
         }
@@ -310,25 +311,25 @@ class PDFService {
       resumeData.additional.forEach(add => {
         if (add.languages) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.languages, this.margin + this.pdf.getTextWidth("Languages:") + 3, this.currentY);
           this.addCurrentY(6);
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.tools, this.margin + this.pdf.getTextWidth("Tools:") + 3, this.currentY);
           this.addCurrentY(6);
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
-          this.pdf.setFont("helvetica", "bold");
+          this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", this.margin, this.currentY);
-          this.pdf.setFont("helvetica", "normal");
+          this.pdf.setFont(this.fontFamily, "normal");
           this.pdf.text(add.certificates, this.margin + this.pdf.getTextWidth("Certificates:") + 3, this.currentY);
           this.addCurrentY(6);
         }
@@ -339,14 +340,14 @@ class PDFService {
   // Вспомогательные методы для классического дизайна
   private addSectionHeader(title: string, fontSize: number = 18, indent: number = 8): void {
     this.pdf.setFontSize(fontSize);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(title, this.margin, this.currentY);
     this.addCurrentY(indent);
   }
 
   private addWrappedText(text: string, fontSize: number, x: number = this.margin, maxWidth?: number): void {
     this.pdf.setFontSize(fontSize);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
 
     const textWidth = maxWidth || (this.pageWidth - (this.margin * 2));
     const lines = this.pdf.splitTextToSize(text, textWidth);
@@ -381,14 +382,14 @@ class PDFService {
 
   private addExperienceItem(exp: any): void {
     this.pdf.setFontSize(11);
-    this.pdf.setFont("helvetica", "bold");
+    this.pdf.setFont(this.fontFamily, "bold");
     this.pdf.text(exp.job_title, this.margin, this.currentY);
     this.addCurrentY(5);
 
     this.pdf.setFontSize(10);
     this.pdf.text(exp.company, this.margin, this.currentY);
     this.addCurrentY(5);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.setTextColor(100, 100, 100);
     this.pdf.text(exp.dates, this.margin, this.currentY);
     this.addCurrentY(5);
@@ -399,11 +400,11 @@ class PDFService {
 
   private addEducationItem(edu: any): void {
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "bold");
+    this.pdf.setFont(this.fontFamily, "bold");
     this.pdf.text(edu.degree, this.margin, this.currentY);
     this.addCurrentY(5);
 
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(edu.institution, this.margin, this.currentY);
     this.addCurrentY(5);
     
@@ -416,7 +417,7 @@ class PDFService {
   // Вспомогательные методы для современного дизайна
   private addModernSectionHeader(title: string, x: number = this.margin, indent: number = 8): void {
     this.pdf.setFontSize(14);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     const headerColor = this.hexToRgb('#0DC076');
     this.pdf.setTextColor(headerColor.r, headerColor.g, headerColor.b);
     this.pdf.text(title, x, this.currentY);
@@ -427,12 +428,12 @@ class PDFService {
 
   private addModernExperienceItem(exp: any, x: number = this.margin, maxWidth?: number): void {
     this.pdf.setFontSize(11);
-    this.pdf.setFont("helvetica", "bold");
+    this.pdf.setFont(this.fontFamily, "bold");
     this.pdf.text(exp.job_title, x, this.currentY);
     this.addCurrentY(5);
 
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(exp.company, x, this.currentY);
     this.addCurrentY(5);
     
@@ -447,11 +448,11 @@ class PDFService {
 
   private addModernEducationItem(edu: any, x: number = this.margin): void {
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "bold");
+    this.pdf.setFont(this.fontFamily, "bold");
     this.pdf.text(edu.degree, x, this.currentY);
     this.addCurrentY(5);
 
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(edu.institution, x, this.currentY);
     this.addCurrentY(5);
     
@@ -464,14 +465,14 @@ class PDFService {
   // Вспомогательные методы для минималистичного дизайна
   private addMinimalSectionHeader(title: string): void {
     this.pdf.setFontSize(16);
-    this.pdf.setFont("helvetica");
+    this.pdf.setFont(this.fontFamily);
     this.pdf.text(title, this.margin, this.currentY);
     this.addCurrentY(6);
   }
 
   private addMinimalSkillsList(skills: string[]): void {
     this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
+    this.pdf.setFont(this.fontFamily, "normal");
     const skillsText = skills.join("  |  ");
     const lines = this.pdf.splitTextToSize(skillsText, this.pageWidth - (this.margin * 2));
 
@@ -493,7 +494,7 @@ class PDFService {
 
     // Устанавливаем шрифт и размер
     this.pdf.setFontSize(fontSize);
-    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setFont(this.fontFamily, 'normal');
     
     // Рассчитываем ширину текста
     const textWidth = this.pdf.getTextWidth(text);
@@ -521,13 +522,13 @@ class PDFService {
     
     // Добавляем заголовок
     this.pdf.setFontSize(16);
-    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFont(this.fontFamily, 'bold');
     this.pdf.text('Cover Letter', this.margin, this.currentY);
     this.addCurrentY(15);
     
     // Добавляем дату
     this.pdf.setFontSize(8);
-    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setFont(this.fontFamily, 'normal');
     const currentDate = new Date().toLocaleDateString();
     this.pdf.text(`Generated on: ${currentDate}`, this.margin, this.currentY);
     this.addCurrentY(10);
