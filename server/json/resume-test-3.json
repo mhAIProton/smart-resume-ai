@@ -1,0 +1,33 @@
+{
+  "full_name": "Anna Smirnova",
+  "profession": "Junior Developer",
+  "summary": "Entry-level developer with basic programming skills and strong motivation to learn and grow in the tech industry.",
+  "contacts": {
+    "email": "anna.smirnova@gmail.com",
+    "phone": "+7 777 999 11 22",
+    "portfolio": ""
+  },
+  "skills": ["HTML", "CSS", "JavaScript", "Git"],
+  "experience": [
+    {
+      "job_title": "Intern",
+      "company": "TechStart",
+      "dates": "2023–2024",
+      "description": "Assisted with frontend development tasks\nLearned modern web development practices\nParticipated in code reviews and team meetings"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Self-taught Programming",
+      "institution": "Online Courses",
+      "dates": "2022–2023"
+    }
+  ],
+  "additional": [
+    {
+      "languages": "Russian (native), English (A2)",
+      "tools": "VS Code, GitHub",
+      "certificates": ""
+    }
+  ]
+}

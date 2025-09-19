@@ -1,0 +1,39 @@
+{
+  "full_name": "Maria Kozlova",
+  "profession": "Digital Marketing Manager",
+  "summary": "Digital marketing specialist with 3 years of experience in social media marketing and content creation. Proven track record of increasing brand awareness and engagement across multiple platforms.",
+  "contacts": {
+    "email": "maria.kozlova@email.com",
+    "phone": "+7 888 123 45 67",
+    "portfolio": "behance.net/maria-kozlova"
+  },
+  "skills": ["Social Media Marketing", "Content Creation", "Google Analytics", "Facebook Ads", "Instagram Marketing", "Email Marketing", "Canva", "Photoshop"],
+  "experience": [
+    {
+      "job_title": "Digital Marketing Manager",
+      "company": "Brand Agency",
+      "dates": "2022–2024",
+      "description": "Managed social media accounts for 5+ clients\nIncreased follower engagement by 150%\nCreated content calendar and visual materials\nAnalyzed campaign performance and optimized ROI"
+    },
+    {
+      "job_title": "Marketing Specialist",
+      "company": "Local Business",
+      "dates": "2021–2022",
+      "description": "Developed marketing strategies for small business\nManaged Facebook and Instagram advertising campaigns\nCreated promotional materials and content"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor's Degree | Marketing",
+      "institution": "Moscow State University",
+      "dates": "2017–2021"
+    }
+  ],
+  "additional": [
+    {
+      "languages": "Russian (native), English (B2)",
+      "tools": "Facebook Ads Manager, Google Analytics, Canva, Photoshop, Hootsuite",
+      "certificates": "Google Digital Marketing Certificate (2022)"
+    }
+  ]
+}

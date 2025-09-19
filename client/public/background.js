@@ -1,16 +1,11 @@
-// Simple background script for testing
-console.log('Background script loaded')
-
 chrome.runtime.onInstalled.addListener(() => {
   console.log('SmartResumeAI extension installed')
 })
 
 // Handle action button click
 chrome.action.onClicked.addListener((tab) => {
-  console.log('Action button clicked for tab:', tab.id);
-
   // Try to open side panel if supported
-  if (chrome.sidePanel && chrome.sidePanel.open) {
+  if (chrome.sidePanel?.open) {
     try {
       chrome.sidePanel.open({ windowId: tab.windowId });
       chrome.runtime.sendMessage({ action: 'refreshUserData' });
