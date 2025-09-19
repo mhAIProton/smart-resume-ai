@@ -4,7 +4,7 @@ import { useAppContext, User } from '@/contexts/AppContextProvider';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useGenerateResume, useGenerateCoverLetter } from '@/hooks/useApi';
 import toast from 'react-hot-toast';
-import { pdfService, ResumeData, DesignType } from '@/services/pdf/pdfService';
+import { pdfService, ResumeData } from '@/services/pdf/pdfService';
 import ResumeDisplay from '@/components/ResumeDisplay';
 
 const StepResult: React.FC = () => {
@@ -19,14 +19,14 @@ const StepResult: React.FC = () => {
     selectedDesign,
     user,
     setUser,
+    generatedContent,
+    setGeneratedContent,
     setShowSubscriptionsPopup
   } = useAppContext();
   const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<string>('');
-  const [resumeContent, setResumeContent] = useState<ResumeData>({} as ResumeData);
-  
+
   const generateResume = useGenerateResume();
   const generateCoverLetter = useGenerateCoverLetter();
 
@@ -38,7 +38,7 @@ const StepResult: React.FC = () => {
 
   // Функция для генерации контента
   const generateContent = async () => {
-    if (!isAuthenticated || Number(user?.remainingGenerations) < 1) {
+    if (!isAuthenticated || generatedContent || Number(user?.remainingGenerations) < 1) {
       return;
     }
 
@@ -55,10 +55,6 @@ const StepResult: React.FC = () => {
         };
 
         content = await generateResume.execute(request);
-        if (content) {
-          const parsedContent = JSON.parse(content) as ResumeData;
-          setResumeContent(parsedContent);
-        }
       } else {
         // Генерируем сопроводительное письмо
         const request = {
@@ -74,6 +70,8 @@ const StepResult: React.FC = () => {
         setIsGenerated(true);
         setUser({ ...user, remainingGenerations: Math.max(0, Number(user?.remainingGenerations) - 1)} as User);
         toast.success('Content generated successfully!');
+      } else {
+        setGeneratedContent('Your draft will appear here...');
       }
     } catch (error) {
       console.error('Generation error:', error);
@@ -81,14 +79,9 @@ const StepResult: React.FC = () => {
     }
   };
 
-  // Получаем сгенерированный контент
-  const getGeneratedContent = () => {
-    return generatedContent || 'Your draft will appear here...';
-  };
-
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(getGeneratedContent());
+      await navigator.clipboard.writeText(typeof generatedContent === 'string' ? generatedContent : JSON.stringify(generatedContent));
       setCopied(true);
       toast.success('Text copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
@@ -102,51 +95,26 @@ const StepResult: React.FC = () => {
   };
 
   const handleDownloadPDF = () => {
-    try {
-      const content = getGeneratedContent();
-      
-      if (!content || content === 'Your draft will appear here...') {
+    if (generationType === 'cover-letter') {
+      if (!generatedContent) {
         toast.error('No content to download');
         return;
       }
 
-      if (generationType === 'resume') {
-        // Парсим JSON данные для резюме
-        let resumeData: ResumeData;
-        try {
-          resumeData = JSON.parse(content);
-        } catch (parseError) {
-          console.error('Failed to parse resume JSON:', parseError);
-          toast.error('Invalid resume data format');
-          return;
-        }
+      try {
+        pdfService.generateCoverLetterPDF(generatedContent as string);
 
-        // Генерируем PDF используя pdfService
-        const design = (selectedDesign || 'classic') as DesignType;
-        pdfService.generatePDF(resumeData, design);
-        
-        // Генерируем имя файла
-        const timestamp = new Date().toISOString().split('T')[0];
-        const fileName = `resume_${timestamp}.pdf`;
-        
-        // Скачиваем PDF
-        pdfService.downloadPDF(fileName);
-      } else {
-        // Для cover letter используем pdfService
-        pdfService.generateCoverLetterPDF(content);
-        
-        // Генерируем имя файла
         const timestamp = new Date().toISOString().split('T')[0];
         const fileName = `cover-letter_${timestamp}.pdf`;
-        
-        // Скачиваем PDF
         pdfService.downloadPDF(fileName);
+
+        toast.success('PDF downloaded successfully!');
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        toast.error('Failed to generate PDF. Please try again.');
       }
-      
-      toast.success('PDF downloaded successfully!');
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+    } else {
+      navigate('design');
     }
   };
 
@@ -221,8 +189,8 @@ const StepResult: React.FC = () => {
         <div className="draft-container bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-y-auto">
           <div className="whitespace-pre-line text-sm text-gray-800 font-mono leading-relaxed">
             {generationType === 'cover-letter'
-              ? getGeneratedContent()
-              : <ResumeDisplay resumeData={resumeContent} design={selectedDesign || 'classic'} />
+              ? generatedContent as string
+              : <ResumeDisplay resumeData={generatedContent as ResumeData | string} />
             }
           </div>
         </div>

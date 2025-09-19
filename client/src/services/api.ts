@@ -1,13 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { loadFromStorage, removeFromStorage, STORAGE_KEYS } from '../utils/chromeStorage';
 
-// Типы для API
-export interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  content?: string;
-}
-
 export interface GenerationRequest {
   type: 'resume' | 'cover_letter';
   jobDescription: string;
@@ -138,9 +131,9 @@ class ApiService {
     userExperience?: string;
     existingResume?: string;
     design?: 'classic' | 'modern' | 'minimal';
-  }): Promise<string> {
+  }): Promise<any> {
     const response = await this.api.post<{ content: string }>('/openai/generate-resume', request);
-    return String(response.data.content);
+    return response.data.content;
   }
 
   async generateCoverLetter(request: {
