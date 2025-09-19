@@ -42,7 +42,7 @@ const StepResume: React.FC = () => {
         option: 'generate',
         generateText: generateText.trim()
       });
-      navigate('design');
+      navigate('result');
     }
   }
 
@@ -54,7 +54,7 @@ const StepResume: React.FC = () => {
         uploadedFile: uploadedFile || undefined,
         uploadedFileName: uploadedFile?.name
       });
-      navigate('design');
+      navigate('result');
     }
   }
 

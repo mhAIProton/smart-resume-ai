@@ -1,0 +1,61 @@
+{
+  "full_name": "Alexander Volkov",
+  "profession": "Senior Software Engineer & Technical Lead",
+  "summary": "Highly experienced software engineer and technical leader with 10+ years of experience in enterprise software development. Expert in multiple programming languages, cloud architectures, and team leadership. Successfully delivered complex projects for Fortune 500 companies and led cross-functional teams of 15+ developers. Specialized in microservices architecture, DevOps practices, and scalable system design.",
+  "contacts": {
+    "email": "alexander.volkov@enterprise.com",
+    "phone": "+7 495 123 45 67",
+    "portfolio": "linkedin.com/in/alexander-volkov-tech"
+  },
+  "skills": ["Java", "Python", "C#", "JavaScript", "TypeScript", "React", "Angular", "Vue.js", "Node.js", "Spring Boot", "Django", "FastAPI", "PostgreSQL", "MongoDB", "Redis", "Elasticsearch", "Kafka", "RabbitMQ", "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Jenkins", "GitLab CI", "Prometheus", "Grafana", "Jest", "Cypress", "Selenium", "JUnit", "Mockito", "Agile", "Scrum", "Leadership", "Mentoring"],
+  "experience": [
+    {
+      "job_title": "Technical Lead & Senior Software Engineer",
+      "company": "GlobalTech Solutions",
+      "dates": "2020–2024",
+      "description": "Led development team of 15+ engineers across multiple time zones\nArchitected and implemented microservices platform serving 1M+ users\nRedesigned legacy monolith into scalable cloud-native architecture\nReduced system response time by 70% through performance optimization\nImplemented comprehensive CI/CD pipelines reducing deployment time by 80%\nMentored junior and mid-level developers, conducted technical interviews\nEstablished coding standards and best practices across the organization\nCollaborated with product managers and stakeholders to define technical roadmap"
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company": "FinTech Innovations",
+      "dates": "2017–2020",
+      "description": "Developed high-frequency trading systems processing 100K+ transactions per second\nBuilt real-time risk management platform using event-driven architecture\nImplemented machine learning models for fraud detection and risk assessment\nOptimized database performance resulting in 50% reduction in query time\nLed migration from on-premises to cloud infrastructure (AWS)\nCollaborated with compliance team to ensure regulatory requirements\nConducted code reviews and mentored 5 junior developers"
+    },
+    {
+      "job_title": "Software Engineer",
+      "company": "E-Commerce Platform",
+      "dates": "2015–2017",
+      "description": "Developed RESTful APIs and microservices for e-commerce platform\nBuilt recommendation engine increasing conversion rate by 25%\nImplemented payment processing integration with multiple providers\nCreated automated testing framework reducing bug rate by 40%\nWorked with cross-functional teams including designers and product managers\nParticipated in agile development process and sprint planning"
+    },
+    {
+      "job_title": "Junior Software Developer",
+      "company": "Web Development Agency",
+      "dates": "2014–2015",
+      "description": "Developed web applications using Java Spring and JavaScript\nCreated responsive frontend interfaces using HTML, CSS, and jQuery\nWorked with MySQL databases and implemented CRUD operations\nCollaborated with senior developers on complex projects\nParticipated in code reviews and learned best practices"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master's Degree | Computer Science",
+      "institution": "Moscow Institute of Physics and Technology",
+      "dates": "2012–2014"
+    },
+    {
+      "degree": "Bachelor's Degree | Software Engineering",
+      "institution": "Moscow Institute of Physics and Technology",
+      "dates": "2008–2012"
+    },
+    {
+      "degree": "Executive MBA",
+      "institution": "Moscow School of Management SKOLKOVO",
+      "dates": "2018–2020"
+    }
+  ],
+  "additional": [
+    {
+      "languages": "Russian (native), English (C2), German (B2), French (A2)",
+      "tools": "IntelliJ IDEA, VS Code, Eclipse, Git, Docker, Kubernetes, Jenkins, GitLab, Jira, Confluence, Slack, Zoom, AWS Console, Azure Portal, GCP Console, Postman, Swagger, Kibana, Grafana, Prometheus",
+      "certificates": "AWS Solutions Architect Professional (2023), Google Cloud Professional Cloud Architect (2022), Certified Kubernetes Administrator (2021), PMI Project Management Professional (2020), Oracle Certified Professional Java SE Developer (2019)"
+    }
+  ]
+}

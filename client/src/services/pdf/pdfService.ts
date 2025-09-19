@@ -37,6 +37,8 @@ class PDFService {
   private pageHeight: number;
   private margin: number;
   private currentY: number;
+  private currentPage: number;
+  private design: DesignType;
   private fontFamily: string = 'helvetica';
 
   constructor() {
@@ -45,10 +47,13 @@ class PDFService {
     this.pageHeight = this.pdf.internal.pageSize.getHeight();
     this.margin = 20;
     this.currentY = this.margin;
+    this.currentPage = 1;
+    this.design = "classic";
   }
 
   // Основной метод для генерации PDF резюме
   generatePDF(resumeData: ResumeData, design: DesignType): void {
+    this.design = design;
     this.resetPDF();
     
     switch (design) {
@@ -75,6 +80,30 @@ class PDFService {
       this.pdf.addPage();
       this.currentY = this.margin;
     }
+  }
+
+  private addCurrentYToPage(value: number): void {
+    this.currentY += value;
+
+    if (this.currentY > this.pageHeight - this.margin) {
+      this.currentPage++;
+
+      if (this.currentPage > this.getPagesCount()) {
+        this.pdf.addPage();
+
+        if (this.design === "modern") {
+          this.pdf.setFillColor(241, 241, 241);
+          this.pdf.rect(0, 0, this.pageWidth * 0.65, this.pageHeight, "F");
+        }
+      }
+
+      this.currentY = this.margin;
+      this.pdf.setPage(this.currentPage);
+    }
+  }
+
+  private getPagesCount(): number {
+    return this.pdf.internal.pages.filter(page => page).length;
   }
 
   private getMmFromPx(px: number): number {
@@ -112,7 +141,7 @@ class PDFService {
 
     // Профессиональное резюме
     this.addSectionHeader('Profile');
-    this.addWrappedText(resumeData.summary, 10);
+    this.addBoxedText(resumeData.summary);
     this.addCurrentY(8);
 
     // Навыки
@@ -141,25 +170,25 @@ class PDFService {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.languages, this.margin + this.pdf.getTextWidth("Languages:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.languages);
+          this.addCurrentY(2);
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.tools, this.margin + this.pdf.getTextWidth("Tools:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.tools);
+          this.addCurrentY(2);
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.certificates, this.margin + this.pdf.getTextWidth("Certificates:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.certificates);
+          this.addCurrentY(2);
         }
       });
     }
@@ -174,70 +203,75 @@ class PDFService {
     const leftColumnWidth = this.pageWidth * 0.65;
     const rightColumnWidth = this.pageWidth * 0.35;
     const rightColumnStart = leftColumnWidth + 4;
+    let maxWidth = leftColumnWidth - (this.margin * 2);
 
     // Левая колонка (серый фон)
     this.pdf.setFillColor(241, 241, 241);
     this.pdf.rect(0, 0, leftColumnWidth, this.pageHeight, "F");
 
-    // Правая колонка (белый фон)
-    this.pdf.setFillColor(255, 255, 255);
-    this.pdf.rect(leftColumnWidth, 0, rightColumnWidth, this.pageHeight, "F");
-
     // ЛЕВАЯ КОЛОНКА - Имя и профессия
-    this.pdf.setFontSize(16);
-    this.pdf.setFont(this.fontFamily, "normal");
-    this.pdf.text(resumeData.full_name, this.margin, this.margin + 10);
-    
-    this.pdf.setFontSize(18);
-    this.pdf.text(resumeData.profession, this.margin, this.margin + 20);
+    this.addBoxedText(resumeData.full_name, { maxWidth, fontSize: 16, lineHeight: 0.4 });
+    this.addBoxedText(resumeData.profession, { maxWidth, fontSize: 18, lineHeight: 0.4 });
     
     this.pdf.setTextColor(0, 0, 0);
     this.currentY = this.margin + 35;
 
     // ЛЕВАЯ КОЛОНКА - Profile
     this.addModernSectionHeader("Profile", this.margin);
-    this.addWrappedText(resumeData.summary, 10, this.margin, leftColumnWidth - (this.margin * 2));
-    this.addCurrentY(8);
+    this.addBoxedText(resumeData.summary, { maxWidth });
+    this.addCurrentYToPage(8);
 
     // ЛЕВАЯ КОЛОНКА - Experience
     this.addModernSectionHeader("Experience", this.margin);
     resumeData.experience.forEach(exp => {
-      this.addModernExperienceItem(exp, this.margin, leftColumnWidth - (this.margin * 2));
+      this.addModernExperienceItem(exp, this.margin, maxWidth);
     });
-    this.addCurrentY(8);
+    this.addCurrentYToPage(8);
 
     // ПРАВАЯ КОЛОНКА - Контакты с иконками
+    maxWidth = rightColumnWidth - (this.margin * 2);
+
     this.currentY = this.margin + 8;
+    this.currentPage = 1;
+    this.pdf.setPage(this.currentPage);
+
     this.pdf.setFontSize(10);
     this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.addImage('/icons/pdf-mail.png', 'PNG', rightColumnStart, this.currentY - 4, 5, 5);
-    this.pdf.text(resumeData.contacts.email, rightColumnStart + 7, this.currentY);
-    this.addCurrentY(6);
+    this.addBoxedText(resumeData.contacts.email, { x: rightColumnStart + 7, maxWidth });
     this.pdf.addImage('/icons/pdf-phone.png', 'PNG', rightColumnStart, this.currentY - 4, 5, 5);
-    this.pdf.text(resumeData.contacts.phone, rightColumnStart + 7, this.currentY);
-    this.addCurrentY(6);
+    this.addBoxedText(resumeData.contacts.phone, { x: rightColumnStart + 7, maxWidth });
     this.pdf.addImage('/icons/pdf-link.png', 'PNG', rightColumnStart, this.currentY - 4, 5, 5);
-    this.pdf.text(resumeData.contacts.portfolio, rightColumnStart + 7, this.currentY);
-    this.addCurrentY(14);
+    this.addBoxedText(resumeData.contacts.portfolio, { x: rightColumnStart + 7, maxWidth });
+    this.addCurrentYToPage(8);
 
     // ПРАВАЯ КОЛОНКА - Skills
     this.addModernSectionHeader("Skills", rightColumnStart, 6);
     this.addSkillsList(resumeData.skills, this.pageWidth - (this.margin * 2), rightColumnStart);
-    this.addCurrentY(6);
+    this.addCurrentYToPage(6);
 
     // ПРАВАЯ КОЛОНКА - Education
     this.addModernSectionHeader("Education", rightColumnStart);
     resumeData.education.forEach((edu, index) => {
-      this.addModernEducationItem(edu, rightColumnStart);
+      this.pdf.setFontSize(10);
+      this.pdf.setFont(this.fontFamily, "bold");
+      this.addBoxedText(edu.degree, { x: rightColumnStart, maxWidth });
+      this.pdf.setFont(this.fontFamily, "normal");
+      this.addBoxedText(edu.institution, { x: rightColumnStart, maxWidth });
+      this.pdf.setTextColor(100, 100, 100);
+      this.pdf.text(edu.dates, rightColumnStart, this.currentY);
+      this.pdf.setTextColor(0, 0, 0);
+      this.addCurrentYToPage(8);
+
       if (index < resumeData.education.length - 1) {
         // Тонкая серая линия между элементами
         this.pdf.setDrawColor(200, 200, 200);
         this.pdf.setLineWidth(0.3);
         this.pdf.line(rightColumnStart, this.currentY - 3, rightColumnStart + rightColumnWidth - (this.margin * 2), this.currentY - 3);
-        this.addCurrentY(4);
+        this.addCurrentYToPage(4);
       }
     });
-    this.addCurrentY(8);
+    this.addCurrentYToPage(8);
 
     // ПРАВАЯ КОЛОНКА - Additional
     if (resumeData.additional.length > 0) {
@@ -248,24 +282,24 @@ class PDFService {
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", rightColumnStart, this.currentY);
           this.pdf.setFont(this.fontFamily, "normal");
-          this.addCurrentY(5);
-          this.addWrappedText(add.languages, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
+          this.addCurrentYToPage(5);
+          this.addBoxedText(add.languages, { x: rightColumnStart, maxWidth });
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", rightColumnStart, this.currentY);
           this.pdf.setFont(this.fontFamily, "normal");
-          this.addCurrentY(5);
-          this.addWrappedText(add.tools, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
+          this.addCurrentYToPage(5);
+          this.addBoxedText(add.tools, { x: rightColumnStart, maxWidth });
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", rightColumnStart, this.currentY);
           this.pdf.setFont(this.fontFamily, "normal");
-          this.addCurrentY(5);
-          this.addWrappedText(add.certificates, 10, rightColumnStart, rightColumnWidth - (this.margin * 2));
+          this.addCurrentYToPage(5);
+          this.addBoxedText(add.certificates, { x: rightColumnStart, maxWidth });
         }
       });
     }
@@ -279,12 +313,12 @@ class PDFService {
 
     // Контакты
     this.pdf.setFontSize(10);
-    this.pdf.text(`${resumeData.contacts.email}  |  ${resumeData.contacts.phone}  |  ${resumeData.contacts.portfolio}`, this.margin, this.currentY);
-    this.addCurrentY(14);
+    this.addBoxedText(`${resumeData.contacts.email}  |  ${resumeData.contacts.phone}  |  ${resumeData.contacts.portfolio}`);
+    this.addCurrentY(8);
 
     // Профессиональное резюме
-    this.addMinimalSectionHeader('Profile');
-    this.addWrappedText(resumeData.summary, 10);
+    this.addSectionHeader('Profile');
+    this.addBoxedText(resumeData.summary);
     this.addCurrentY(8);
 
     // Навыки
@@ -313,25 +347,25 @@ class PDFService {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Languages: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.languages, this.margin + this.pdf.getTextWidth("Languages:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.languages);
+          this.addCurrentY(2);
         }
         if (add.tools) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Tools: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.tools, this.margin + this.pdf.getTextWidth("Tools:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.tools);
+          this.addCurrentY(2);
         }
         if (add.certificates) {
           this.pdf.setFontSize(10);
           this.pdf.setFont(this.fontFamily, "bold");
           this.pdf.text("Certificates: ", this.margin, this.currentY);
-          this.pdf.setFont(this.fontFamily, "normal");
-          this.pdf.text(add.certificates, this.margin + this.pdf.getTextWidth("Certificates:") + 3, this.currentY);
-          this.addCurrentY(6);
+          this.addCurrentY(5);
+          this.addBoxedText(add.certificates);
+          this.addCurrentY(2);
         }
       });
     }
@@ -353,6 +387,30 @@ class PDFService {
     const lines = this.pdf.splitTextToSize(text, textWidth);
     this.pdf.text(lines, x, this.currentY);
     this.addCurrentY(lines.length * fontSize * 0.4 + 5);
+  }
+
+  private addBoxedText(text: string, options?: { fontSize?: number, x?: number, maxWidth?: number, indent?: number, fontWeight?: string, lineHeight?: number }): void {
+    const { 
+      fontSize = 10, 
+      x = this.margin, 
+      maxWidth = this.pageWidth - (this.margin * 2), 
+      indent = 2,
+      fontWeight = "normal",
+      lineHeight = 0.5
+    } = options || {};
+    
+    this.pdf.setFontSize(fontSize);
+    this.pdf.setFont(this.fontFamily, fontWeight);
+
+    const textWidth = maxWidth || (this.pageWidth - (this.margin * 2));
+    const lines = this.pdf.splitTextToSize(text, textWidth);
+
+    lines.forEach((line: string) => {
+      this.pdf.text(line, x, this.currentY);
+      this.addCurrentY(fontSize * lineHeight);
+    });
+
+    this.addCurrentY(indent);
   }
 
   private addSkillsList(skills: string[], maxWidth?: number | undefined, x?: number | undefined): void {
@@ -394,7 +452,7 @@ class PDFService {
     this.pdf.text(exp.dates, this.margin, this.currentY);
     this.addCurrentY(5);
     this.pdf.setTextColor(0, 0, 0);
-    this.addWrappedText(exp.description, 9);
+    this.addBoxedText(exp.description);
     this.addCurrentY(2);
   }
 
@@ -422,44 +480,27 @@ class PDFService {
     this.pdf.setTextColor(headerColor.r, headerColor.g, headerColor.b);
     this.pdf.text(title, x, this.currentY);
     this.pdf.setTextColor(0, 0, 0);
-    this.addCurrentY(indent);
+    this.addCurrentYToPage(indent);
   }
-
 
   private addModernExperienceItem(exp: any, x: number = this.margin, maxWidth?: number): void {
     this.pdf.setFontSize(11);
     this.pdf.setFont(this.fontFamily, "bold");
     this.pdf.text(exp.job_title, x, this.currentY);
-    this.addCurrentY(5);
+    this.addCurrentYToPage(5);
 
     this.pdf.setFontSize(10);
     this.pdf.setFont(this.fontFamily, "normal");
     this.pdf.text(exp.company, x, this.currentY);
-    this.addCurrentY(5);
+    this.addCurrentYToPage(5);
     
     this.pdf.setTextColor(100, 100, 100);
     this.pdf.text(exp.dates, x, this.currentY);
-    this.addCurrentY(5);
+    this.addCurrentYToPage(5);
     this.pdf.setTextColor(0, 0, 0);
 
-    this.addWrappedText(exp.description, 9, x, maxWidth);
-    this.addCurrentY(2);
-  }
-
-  private addModernEducationItem(edu: any, x: number = this.margin): void {
-    this.pdf.setFontSize(10);
-    this.pdf.setFont(this.fontFamily, "bold");
-    this.pdf.text(edu.degree, x, this.currentY);
-    this.addCurrentY(5);
-
-    this.pdf.setFont(this.fontFamily, "normal");
-    this.pdf.text(edu.institution, x, this.currentY);
-    this.addCurrentY(5);
-    
-    this.pdf.setTextColor(100, 100, 100);
-    this.pdf.text(edu.dates, x, this.currentY);
-    this.pdf.setTextColor(0, 0, 0);
-    this.addCurrentY(8);
+    this.addBoxedText(exp.description, { x: x, fontSize: 9, maxWidth: maxWidth, indent: 2 });
+    this.addCurrentYToPage(2);
   }
 
   // Вспомогательные методы для минималистичного дизайна
@@ -480,7 +521,7 @@ class PDFService {
       this.pdf.text(line, this.margin, this.currentY + (index * 6));
     });
 
-    this.addCurrentY(lines.length * 3 + 5);
+    this.addCurrentY(lines.length * 10 * 0.5 + 3);
   }
 
   private addBadge(text: string, x: number, y: number): number {
