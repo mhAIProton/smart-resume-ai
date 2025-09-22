@@ -45,6 +45,8 @@ const AuthCallback: React.FC = () => {
           name: userData.name,
           plan: userData.plan,
           remainingGenerations: userData.remainingGenerations,
+          totalGenerations: userData.totalGenerations,
+          subscriptionStatus: userData.subscriptionStatus,
         });
         
         // Перенаправляем на главную страницу

@@ -17,10 +17,13 @@ const StepMain: React.FC = () => {
 
   // Восстанавливаем текст из контекста при загрузке компонента
   useEffect(() => {
-    if (jobDescription?.text) {
-      setJobText(jobDescription.text);
-    }
+    setJobText(jobDescription?.text || '');
   }, [jobDescription]);
+
+  const handleJobTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setJobText(e.target.value);
+    setJobDescription({text: e.target.value, source: 'manual'});
+  }
 
   const handleContinue = async () => {
     if (isTextExist()) {
@@ -66,7 +69,7 @@ const StepMain: React.FC = () => {
       <div className="mb-4">
         <textarea
           value={jobText}
-          onChange={(e) => setJobText(e.target.value)}
+          onChange={handleJobTextChange}
           placeholder="Paste full job description"
           className="w-full p-3 border rounded-lg resize-none border-gray-300 bg-gray-200 focus-visible:border-gray-600"
           rows={8}

@@ -19,6 +19,8 @@ export interface AuthResponse {
     avatar?: string;
     plan: UserPlan;
     remainingGenerations: number;
+    totalGenerations: number;
+    subscriptionStatus: SubscriptionStatus;
   };
 }
 
@@ -51,6 +53,8 @@ export class AuthService {
         avatar: user.avatar,
         plan: user.plan,
         remainingGenerations: user.remainingGenerations,
+        totalGenerations: user.totalGenerations,
+        subscriptionStatus: user.subscriptionStatus,
       },
     };
   }

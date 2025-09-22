@@ -8,12 +8,13 @@ import clsx from 'clsx';
  */
 const StepRegenerate: React.FC = () => {
   const { navigate } = useNavigation();
-  const { setRegenerateComment } = useAppContext();
+  const { setRegenerateComment, setGeneratedContent } = useAppContext();
   const [comment, setComment] = useState('');
 
   const handleContinue = async () => {
     if (isCommentValid()) {
       await setRegenerateComment(comment.trim());
+      await setGeneratedContent('');
       navigate('result');
     }
   };

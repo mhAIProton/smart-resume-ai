@@ -61,7 +61,7 @@ async function initiateGoogleAuth(apiUrl = 'http://localhost:3000') {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(tokenRequest),
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to exchange code for token: ${response.status} ${errorText}`);
@@ -81,7 +81,7 @@ async function initiateGoogleAuth(apiUrl = 'http://localhost:3000') {
     // Store token and user data
     await chrome.storage.local.set({ 
       'smart_resume_auth_token': token, 
-      'smart_resume_user_data': user 
+      'smart_resume_user_data': user,
     });
     
     return { success: true, token, user };

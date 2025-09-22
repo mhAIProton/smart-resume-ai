@@ -16,7 +16,7 @@ export interface UpdateUserDto {
   avatar?: string;
   plan?: UserPlan;
   remainingGenerations?: number;
-  totalGenerations?: number; // Add this line
+  totalGenerations?: number;
 }
 
 @Injectable()

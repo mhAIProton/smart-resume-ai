@@ -22,8 +22,8 @@ const AuthModal: React.FC = () => {
               email: response.user.email,
               name: response.user.name,
               plan: response.user.plan || 'free',
-              remainingGenerations: response.user.remainingGenerations || 3,
-              totalGenerations: response.user.totalGenerations || 0,
+              remainingGenerations: response.user.remainingGenerations || 0,
+              totalGenerations: response.user.totalGenerations || 3,
               subscriptionStatus: response.user.subscriptionStatus || 'active'
             };
 
@@ -72,7 +72,7 @@ const AuthModal: React.FC = () => {
         <button
             onClick={handleGoogleAuth}
             disabled={isLoading}
-            className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 flex items-center justify-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>

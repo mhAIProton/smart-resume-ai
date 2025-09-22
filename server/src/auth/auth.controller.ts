@@ -98,7 +98,7 @@ export class AuthController {
           name: result.user.name,
           plan: result.user.plan,
           remainingGenerations: result.user.remainingGenerations,
-          totalGenerations: (result.user as any).totalGenerations || 0,
+          totalGenerations: (result.user as any).totalGenerations || 3,
           subscriptionStatus: (result.user as any).subscriptionStatus || 'active',
         },
         token: result.access_token,
