@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/contexts/AppContextProvider';
-import { useNavigation } from '@/contexts/NavigationContext';
 import clsx from 'clsx';
+import toast from "react-hot-toast";
+import { DesignType, pdfService } from "@/services/pdf/pdfService.ts";
+import { Download } from "lucide-react";
 
 interface DesignOption {
   value: 'classic' | 'modern' | 'minimal';
@@ -11,8 +13,7 @@ interface DesignOption {
 }
 
 const StepDesign: React.FC = () => {
-  const {navigate} = useNavigation();
-  const {selectedDesign: contextDesign, setSelectedDesign} = useAppContext();
+  const {selectedDesign: contextDesign, setSelectedDesign, generatedContent} = useAppContext();
   const [selectedDesign, setSelectedDesignLocal] = useState<'classic' | 'modern' | 'minimal' | null>(null);
 
   const designOptions: DesignOption[] = [
@@ -48,9 +49,27 @@ const StepDesign: React.FC = () => {
     await setSelectedDesign(design);
   };
 
-  const handleContinue = () => {
-    if (selectedDesign) {
-      navigate('result');
+  const handleDownloadPDF = () => {
+    try {
+      if (!generatedContent) {
+        toast.error('No content to download');
+        return;
+      }
+
+      // Генерируем PDF используя pdfService
+      const design = (selectedDesign || 'classic') as DesignType;
+      pdfService.generatePDF(generatedContent, design);
+
+      // Генерируем имя файла
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileName = `resume_${timestamp}.pdf`;
+
+      // Скачиваем PDF
+      pdfService.downloadPDF(fileName);
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast.error('Failed to generate PDF. Please try again.');
     }
   };
 
@@ -102,16 +121,14 @@ const StepDesign: React.FC = () => {
         ))}
       </div>
 
+      {/* Download PDF button */}
       <button
-        onClick={handleContinue}
+        onClick={handleDownloadPDF}
         disabled={!selectedDesign}
-        className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-colors ${
-          selectedDesign
-            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
+        className="group w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
       >
-        Continue
+        <Download className="w-4 h-4 group-hover:animate-pulse" />
+        <span className="text-sm font-medium">Download PDF</span>
       </button>
     </div>
   );

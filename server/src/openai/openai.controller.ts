@@ -30,19 +30,19 @@ export class OpenaiController {
       throw new ForbiddenException('Insufficient generations remaining');
     }
 
-    const content = await this.openaiService.generateResume(request);
+    // const content = await this.openaiService.generateResume(request);
 
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    return { content };
+    // return { content };
 
     // Читаем содержимое из resume-example.json
-    // const filePath = path.join(process.cwd(), 'resume-example.json');
-    // const fileContent = fs.readFileSync(filePath, 'utf8');
-    // const resumeData = JSON.parse(fileContent);
+    const filePath = path.join(process.cwd(), '/json/resume-example.json');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const resumeData = JSON.parse(fileContent);
     
-    // return { content: JSON.stringify(resumeData, null, 2) };
+    return { content: resumeData };
   }
 
   @Post('generate-cover-letter')
