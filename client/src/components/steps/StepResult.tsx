@@ -19,11 +19,10 @@ const StepResult: React.FC = () => {
     selectedDesign,
     user,
     setUser,
-    setShowSubscriptionsPopup,
     regenerateComment,
     generatedContent,
     setGeneratedContent,
-    setShowSubscriptionsPopup
+    setShowSubscriptionsPopup,
   } = useAppContext();
   const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);

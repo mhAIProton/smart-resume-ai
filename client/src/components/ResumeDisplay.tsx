@@ -1,8 +1,10 @@
 import React from 'react';
-import { ResumeData } from '@/services/pdf/pdfService';
+import { ResumeData as PDFResumeData } from '@/services/pdf/pdfService';
+import EditableContent from './EditableContent';
+import { useAppContext } from '@/contexts/AppContextProvider';
 
 interface ResumeDisplayProps {
-  resumeData: ResumeData | string;
+  resumeData: PDFResumeData;
 }
 
 const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
@@ -15,12 +17,25 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
     );
   }
 
+  const { updateGeneratedContent } = useAppContext();
+
+  const handleNameChange = (newName: string) => {
+    updateGeneratedContent({ full_name: newName } as Partial<PDFResumeData>);
+  };
+
   return (
     <div className="resume-display">
       <div className="resume-classic bg-white p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">{resumeData.full_name}</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            <EditableContent
+              value={resumeData.full_name}
+              onChange={handleNameChange}
+              className="text-2xl font-semibold text-gray-900"
+              placeholder="Enter your name"
+            />
+          </h1>
           <h2 className="text-lg text-gray-700">{resumeData.profession}</h2>
         </div>
 
@@ -55,8 +70,8 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
                 key={index}
                 className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700"
               >
-              {skill}
-            </span>
+                {skill}
+              </span>
             ))}
           </div>
         </div>

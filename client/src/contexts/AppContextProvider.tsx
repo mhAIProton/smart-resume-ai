@@ -72,6 +72,7 @@ export interface AppContextType {
   setGenerationType: (type: 'resume' | 'cover-letter' | null) => Promise<void>;
   setSelectedTone: (tone: 'formal' | 'friendly' | 'bold' | null) => Promise<void>;
   setGeneratedContent: (data: ResumeData | string) => Promise<void>;
+  updateGeneratedContent: (updates: any) => Promise<void>;
   setResumeData: (data: ResumeData | null) => Promise<void>;
   setSelectedDesign: (design: 'classic' | 'modern' | 'minimal' | null) => Promise<void>;
   setRegenerateComment: (comment: string | null) => Promise<void>;
@@ -113,6 +114,7 @@ export const AppContext = createContext<AppContextType>({
   setJobDescription: async () => {},
   setGenerationType: async () => {},
   setGeneratedContent: async () => {},
+  updateGeneratedContent: async () => {},
   setSelectedTone: async () => {},
   setResumeData: async () => {},
   setSelectedDesign: async () => {},
@@ -140,7 +142,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
   const [resumeData, setResumeDataState] = useState<ResumeData | null>(null);
   const [selectedDesign, setSelectedDesignState] = useState<'classic' | 'modern' | 'minimal' | null>(null);
   const [regenerateComment, setRegenerateCommentState] = useState<string | null>(null);
-  const [generatedContent, setGeneratedContent] = useState<ResumeData | string>('');
+  const [generatedContent, setGeneratedContentState] = useState<ResumeData | string>('');
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showSubscriptionsPopup, setShowSubscriptionsPopup] = useState(false);
@@ -216,12 +218,29 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
     }
   };
 
+  const setGeneratedContent = async (data: ResumeData | string) => {
+    setGeneratedContentState(data);
+    if (data) {
+      await saveToStorage(STORAGE_KEYS.GENERATED_CONTENT, data);
+    } else {
+      await removeFromStorage(STORAGE_KEYS.GENERATED_CONTENT);
+    }
+  };
+
   const setRegenerateComment = async (comment: string | null) => {
     setRegenerateCommentState(comment);
     if (comment) {
       await saveToStorage(STORAGE_KEYS.REGENERATE_COMMENT, comment);
     } else {
       await removeFromStorage(STORAGE_KEYS.REGENERATE_COMMENT);
+    }
+  };
+
+  const updateGeneratedContent = async (updates: any) => {
+    if (typeof generatedContent === 'object' && generatedContent !== null) {
+      const updatedContent = { ...generatedContent, ...updates };
+      setGeneratedContent(updatedContent);
+      await saveToStorage(STORAGE_KEYS.GENERATED_CONTENT, updatedContent);
     }
   };
 
@@ -241,7 +260,8 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
       STORAGE_KEYS.SELECTED_TONE,
       STORAGE_KEYS.RESUME_DATA,
       STORAGE_KEYS.SELECTED_DESIGN,
-      STORAGE_KEYS.REGENERATE_COMMENT
+      STORAGE_KEYS.REGENERATE_COMMENT,
+      STORAGE_KEYS.GENERATED_CONTENT
     ];
     await removeFromStorage(keysToRemove);
   };
@@ -313,6 +333,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
       const savedResumeData = await loadFromStorage(STORAGE_KEYS.RESUME_DATA);
       const savedSelectedDesign = await loadFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
       const savedRegenerateComment = await loadFromStorage(STORAGE_KEYS.REGENERATE_COMMENT);
+      const savedGeneratedContent = await loadFromStorage(STORAGE_KEYS.GENERATED_CONTENT);
 
       if (savedJobDescription) setJobDescriptionState(savedJobDescription);
       if (savedGenerationType) setGenerationTypeState(savedGenerationType);
@@ -320,6 +341,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
       if (savedResumeData) setResumeDataState(savedResumeData);
       if (savedSelectedDesign) setSelectedDesignState(savedSelectedDesign);
       if (savedRegenerateComment) setRegenerateCommentState(savedRegenerateComment);
+      if (savedGeneratedContent) setGeneratedContent(savedGeneratedContent);
     } catch (error) {
       console.error('Error loading form data from storage:', error);
     }
@@ -380,9 +402,11 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
         setJobDescription,
         setGenerationType,
         setGeneratedContent,
+        updateGeneratedContent,
         setSelectedTone,
         setResumeData,
         setSelectedDesign,
+        setRegenerateComment,
         setLoading,
         setShowAuthModal,
         setShowSubscriptionsPopup,
