@@ -13,11 +13,13 @@ export interface GenerateResumeRequest {
   userExperience?: string;
   existingResume?: string;
   design?: ResumeDesign;
+  regenerateComment?: string;
 }
 
 export interface GenerateCoverLetterRequest {
   jobDescription: string;
   tone?: CoverLetterTone;
+  regenerateComment?: string;
 }
 
 @Injectable()
@@ -32,7 +34,7 @@ export class OpenaiService {
 
   async generateResume(request: GenerateResumeRequest): Promise<string> {
     try {
-      const { jobDescription, userExperience, existingResume, design = ResumeDesign.CLASSIC } = request;
+      const { jobDescription, userExperience, existingResume, design = ResumeDesign.CLASSIC, regenerateComment } = request;
 
       // Читаем промпт из файла
       const promptPath = path.join(process.cwd(), 'resume_prompt.txt');
@@ -44,11 +46,16 @@ export class OpenaiService {
         .split('User Prompt')[0]
         .replace('System Prompt\n\n', '');
 
-      const userPrompt = promptTemplate
+      let userPrompt = promptTemplate
         .split('User Prompt')[1]
         .replace('${jobDescription}', jobDescription)
         .replace('${existingResume}', existingResume || '')
         .replace('${userExperience}', userExperience || '');
+
+      // Добавляем комментарий для регенерации, если он есть
+      if (regenerateComment?.trim()) {
+        userPrompt += `\n\n**Additional Feedback for Improvement:**\n${regenerateComment.trim()}\n\nPlease incorporate this feedback into the resume generation.`;
+      }
 
       const completion = await this.openai.chat.completions.create({
         model: GPT_MODEL,
@@ -65,17 +72,11 @@ export class OpenaiService {
       console.error('OpenAI API Error:', error);
       throw new BadRequestException('Failed to generate resume. Please try again.');
     }
-
-    // const filePath = path.join(process.cwd(), 'resume-example.json');
-    // const fileContent = fs.readFileSync(filePath, 'utf8');
-    // const resumeData = JSON.parse(fileContent);
-    
-    // return { content: JSON.stringify(resumeData, null, 2) };
   }
 
   async generateCoverLetter(request: GenerateCoverLetterRequest): Promise<string> {
     try {
-      const { jobDescription, tone = CoverLetterTone.FORMAL } = request;
+      const { jobDescription, tone = CoverLetterTone.FORMAL, regenerateComment } = request;
 
       // Читаем промпт из файла
       const promptPath = path.join(process.cwd(), 'cover_letter_prompt.txt');
@@ -87,10 +88,15 @@ export class OpenaiService {
         .split('User Prompt')[0]
         .replace('System Prompt\n\n', '');
 
-      const userPrompt = promptTemplate
+      let userPrompt = promptTemplate
         .split('User Prompt')[1]
         .replace('${jobDescription}', jobDescription)
         .replace('${tone}', tone);
+
+      // Добавляем комментарий для регенерации, если он есть
+      if (regenerateComment?.trim()) {
+        userPrompt += `\n\n**Additional Feedback for Improvement:**\n${regenerateComment.trim()}\n\nPlease incorporate this feedback into the cover letter generation.`;
+      }
 
       const completion = await this.openai.chat.completions.create({
         model: GPT_MODEL,

@@ -46,6 +46,9 @@ export interface AppContextType {
     // Design state
     selectedDesign: 'classic' | 'modern' | 'minimal' | null;
     
+    // Regenerate comment state
+    regenerateComment: string | null;
+    
     // UI state
     loading: boolean;
     showAuthModal: boolean;
@@ -67,6 +70,7 @@ export interface AppContextType {
     setSelectedTone: (tone: 'formal' | 'friendly' | 'bold' | null) => Promise<void>;
     setResumeData: (data: ResumeData | null) => Promise<void>;
     setSelectedDesign: (design: 'classic' | 'modern' | 'minimal' | null) => Promise<void>;
+    setRegenerateComment: (comment: string | null) => Promise<void>;
     setLoading: (loading: boolean) => void;
     setShowAuthModal: (show: boolean) => void;
     setShowSubscriptionsPopup: (show: boolean) => void;
@@ -92,6 +96,7 @@ export const AppContext = createContext<AppContextType>({
     selectedTone: null,
     resumeData: null,
     selectedDesign: null,
+    regenerateComment: null,
     loading: false,
     showAuthModal: false,
     showSubscriptionsPopup: false,
@@ -105,6 +110,7 @@ export const AppContext = createContext<AppContextType>({
     setSelectedTone: async () => {},
     setResumeData: async () => {},
     setSelectedDesign: async () => {},
+    setRegenerateComment: async () => {},
     setLoading: () => {},
     setShowAuthModal: () => {},
     setShowSubscriptionsPopup: () => {},
@@ -127,6 +133,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedTone, setSelectedToneState] = useState<'formal' | 'friendly' | 'bold' | null>(null);
     const [resumeData, setResumeDataState] = useState<ResumeData | null>(null);
     const [selectedDesign, setSelectedDesignState] = useState<'classic' | 'modern' | 'minimal' | null>(null);
+    const [regenerateComment, setRegenerateCommentState] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showSubscriptionsPopup, setShowSubscriptionsPopup] = useState(false);
@@ -202,12 +209,22 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     };
 
+    const setRegenerateComment = async (comment: string | null) => {
+        setRegenerateCommentState(comment);
+        if (comment) {
+            await saveToStorage(STORAGE_KEYS.REGENERATE_COMMENT, comment);
+        } else {
+            await removeFromStorage(STORAGE_KEYS.REGENERATE_COMMENT);
+        }
+    };
+
     const clearFormData = async () => {
         setJobDescription(null);
         setGenerationType(null);
         setSelectedTone(null);
         setResumeData(null);
         setSelectedDesign(null);
+        setRegenerateComment(null);
         
         // Очищаем storage
         const keysToRemove = [
@@ -215,7 +232,8 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
             STORAGE_KEYS.GENERATION_TYPE,
             STORAGE_KEYS.SELECTED_TONE,
             STORAGE_KEYS.RESUME_DATA,
-            STORAGE_KEYS.SELECTED_DESIGN
+            STORAGE_KEYS.SELECTED_DESIGN,
+            STORAGE_KEYS.REGENERATE_COMMENT
         ];
         await removeFromStorage(keysToRemove);
     };
@@ -286,12 +304,14 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
             const savedSelectedTone = await loadFromStorage(STORAGE_KEYS.SELECTED_TONE);
             const savedResumeData = await loadFromStorage(STORAGE_KEYS.RESUME_DATA);
             const savedSelectedDesign = await loadFromStorage(STORAGE_KEYS.SELECTED_DESIGN);
+            const savedRegenerateComment = await loadFromStorage(STORAGE_KEYS.REGENERATE_COMMENT);
 
             if (savedJobDescription) setJobDescriptionState(savedJobDescription);
             if (savedGenerationType) setGenerationTypeState(savedGenerationType);
             if (savedSelectedTone) setSelectedToneState(savedSelectedTone);
             if (savedResumeData) setResumeDataState(savedResumeData);
             if (savedSelectedDesign) setSelectedDesignState(savedSelectedDesign);
+            if (savedRegenerateComment) setRegenerateCommentState(savedRegenerateComment);
         } catch (error) {
             console.error('Error loading form data from storage:', error);
         }
@@ -309,7 +329,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
     // Listen for messages from background script
     useEffect(() => {
-        const handleMessage = (message: any, sender: any, sendResponse: any) => {
+        const handleMessage = (message: any, _sender: any, _sendResponse: any) => {
             if (message.action === 'refreshUserData') {
                 checkAuth();
             }
@@ -339,6 +359,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 selectedTone,
                 resumeData,
                 selectedDesign,
+                regenerateComment,
                 loading,
                 showAuthModal,
                 showSubscriptionsPopup,
@@ -352,6 +373,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
                 setSelectedTone,
                 setResumeData,
                 setSelectedDesign,
+                setRegenerateComment,
                 setLoading,
                 setShowAuthModal,
                 setShowSubscriptionsPopup,

@@ -1,7 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppContextProvider, useAppContext } from './contexts/AppContextProvider';
-import { NavigationProvider, useNavigation, NavigationStep } from './contexts/NavigationContext';
+import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import Header from './components/Header';
 import BackButton from './components/BackButton';
 import StepMain from './components/steps/StepMain';
@@ -10,6 +10,7 @@ import StepResume from './components/steps/StepResume';
 import StepDesign from './components/steps/StepDesign';
 import StepTone from './components/steps/StepTone';
 import StepResult from './components/steps/StepResult';
+import StepRegenerate from './components/steps/StepRegenerate';
 import AuthModal from './components/AuthModal';
 import AuthCallback from './components/AuthCallback';
 import SubscriptionsPopup from './components/SubscriptionsPopup';
@@ -62,6 +63,8 @@ const StepRenderer: React.FC = () => {
       return <StepTone />;
     case 'result':
       return <StepResult />;
+    case 'regenerate':
+      return <StepRegenerate />;
     case 'auth-callback':
       return <AuthCallback />;
     default:

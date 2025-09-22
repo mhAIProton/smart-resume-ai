@@ -17,11 +17,15 @@ const SubscriptionsPopup: React.FC = () => {
     showSubscriptionsPopup, 
     setShowSubscriptionsPopup, 
     setShowMessagePopup,
-    setMessagePopupData
+    setMessagePopupData,
+    user
   } = useAppContext();
   const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'pro-plus' | null>(null);
 
   if (!showSubscriptionsPopup) return null;
+
+  // Достигнут ли лимит генераций 
+  const isLimitReached = Number(user?.remainingGenerations) < 1;
 
   const nextMonth = (): string => {
     const currentDate = new Date();
@@ -129,21 +133,29 @@ const SubscriptionsPopup: React.FC = () => {
         <div className="p-6">
           {/* Warning icon */}
           <div className="flex justify-center mb-2">
-            <img
-              src="/warning.svg"
-              alt="Warning"
-              className="h-6"
-            />
+            {isLimitReached && 
+              <img
+                src="/warning.svg"
+                alt="Warning"
+                className="h-6"
+              />
+            }
           </div>
 
           {/* Title */}
           <h2 className="text-2xl font-semibold text-gray-900 text-center mb-2">
-            You've reached your generations limit
+            {isLimitReached
+              ? 'You\'ve reached your generations limit' 
+              : 'Subscriptions'
+            }
           </h2>
 
           {/* Subtitle */}
           <p className="text-sm text-center mb-4 px-4">
-            Upgrade to Pro/Pro+ Plan to continue using SmartResume AI
+            {isLimitReached
+              ? 'Upgrade to Pro/Pro+ Plan to continue using SmartResume AI'
+              : 'Upgrade your plan to increase the number of AI-generations'
+            }
           </p>
 
           {/* Plan options */}

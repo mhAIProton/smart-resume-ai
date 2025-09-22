@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type NavigationStep = 'main' | 'type' | 'resume' | 'design' | 'tone' | 'result' | 'auth-callback';
+export type NavigationStep = 'main' | 'type' | 'resume' | 'design' | 'tone' | 'result' | 'regenerate' | 'auth-callback';
 
 interface NavigationContextType {
   currentStep: NavigationStep;

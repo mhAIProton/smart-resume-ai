@@ -138,6 +138,7 @@ class ApiService {
     userExperience?: string;
     existingResume?: string;
     design?: 'classic' | 'modern' | 'minimal';
+    regenerateComment?: string;
   }): Promise<string> {
     const response = await this.api.post<{ content: string }>('/openai/generate-resume', request);
     return String(response.data.content);
@@ -146,6 +147,7 @@ class ApiService {
   async generateCoverLetter(request: {
     jobDescription: string;
     tone?: 'formal' | 'friendly' | 'bold';
+    regenerateComment?: string;
   }): Promise<string> {
     const response = await this.api.post<{ content: string }>('/openai/generate-cover-letter', request);
     return String(response.data.content);

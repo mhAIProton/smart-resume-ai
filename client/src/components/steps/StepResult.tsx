@@ -19,7 +19,8 @@ const StepResult: React.FC = () => {
     selectedDesign,
     user,
     setUser,
-    setShowSubscriptionsPopup
+    setShowSubscriptionsPopup,
+    regenerateComment
   } = useAppContext();
   const {navigate} = useNavigation();
   const [copied, setCopied] = useState(false);
@@ -51,7 +52,8 @@ const StepResult: React.FC = () => {
           jobDescription: jobDescription?.text,
           userExperience: resumeData?.option === 'generate' ? resumeData.generateText : undefined,
           existingResume: resumeData?.option === 'improve' ? resumeData.improveText : undefined,
-          design: selectedDesign || 'classic'
+          design: selectedDesign || 'classic',
+          regenerateComment,
         };
 
         content = await generateResume.execute(request);
@@ -63,7 +65,8 @@ const StepResult: React.FC = () => {
         // Генерируем сопроводительное письмо
         const request = {
           jobDescription: jobDescription?.text,
-          tone: selectedTone || 'formal'
+          tone: selectedTone || 'formal',
+          regenerateComment,
         };
 
         content = await generateCoverLetter.execute(request);
@@ -98,7 +101,7 @@ const StepResult: React.FC = () => {
   };
 
   const handleRegenerate = async () => {
-    await generateContent();
+    navigate('regenerate');
   };
 
   const handleDownloadPDF = () => {

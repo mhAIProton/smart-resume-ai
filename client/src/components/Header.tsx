@@ -10,7 +10,7 @@ const Header: React.FC = () => {
     setShowAuthModal, 
     setShowSubscriptionsPopup,
     clearFormData,
-    logout 
+    logout
   } = useAppContext();
   const {navigate} = useNavigation();
 
