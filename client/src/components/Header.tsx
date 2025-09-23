@@ -99,7 +99,7 @@ const Header: React.FC = () => {
           >
               <span className="text-xs text-gray-700">
                 <b>{isAuthenticated ? Number(user?.remainingGenerations) : 3}</b>/<b>{isAuthenticated ? Number(user?.totalGenerations) : 3}</b> AI-generations
-                {isAuthenticated && Number(user?.remainingGenerations) > 1 && (
+                {isAuthenticated && Number(user?.remainingGenerations) < 1 && (
                   <div className="text-xs text-gray-500">
                     {`Your limit will reset on ${nextMonth()} 1.`}
                   </div>

@@ -38,7 +38,7 @@ export class OpenaiController {
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    return { content: JSON.parse(content) };
+    return { content };
 
     // Читаем содержимое из resume-example.json
     // const filePath = path.join(process.cwd(), '/json/resume-example.json');

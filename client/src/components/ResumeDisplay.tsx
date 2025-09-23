@@ -4,7 +4,7 @@ import EditableContent from './EditableContent';
 import { useAppContext } from '@/contexts/AppContextProvider';
 
 interface ResumeDisplayProps {
-  resumeData: PDFResumeData;
+  resumeData: PDFResumeData | string;
 }
 
 const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {

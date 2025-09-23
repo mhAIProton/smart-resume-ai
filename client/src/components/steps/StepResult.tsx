@@ -57,6 +57,9 @@ const StepResult: React.FC = () => {
         };
 
         content = await generateResume.execute(request);
+        if (content) {
+          content = JSON.parse(content);
+        }
       } else {
         // Генерируем сопроводительное письмо
         const request = {

@@ -11,7 +11,7 @@ interface ToneOption {
 
 const StepTone: React.FC = () => {
   const {navigate} = useNavigation();
-  const {selectedTone: contextTone, setSelectedTone} = useAppContext();
+  const {selectedTone: contextTone, setSelectedTone, setGeneratedContent} = useAppContext();
   const [selectedTone, setSelectedToneLocal] = useState<'formal' | 'friendly' | 'bold' | null>(contextTone);
 
   const toneOptions: ToneOption[] = [
@@ -42,6 +42,7 @@ const StepTone: React.FC = () => {
 
   const handleContinue = () => {
     if (selectedTone) {
+      setGeneratedContent('');
       navigate('result');
     }
   };
