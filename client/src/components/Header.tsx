@@ -31,6 +31,13 @@ const Header: React.FC = () => {
     setShowSubscriptionsPopup(true);
   };
 
+  const nextMonth = (): string => {
+    const currentDate = new Date();
+    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    
+    return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(nextMonthDate);
+  };
+
   return (
       <header className="bg-white border-b border-gray-200 py-2 px-3 mb-6">
         <div className="flex items-center justify-between mb-2">
@@ -69,7 +76,7 @@ const Header: React.FC = () => {
           {/* Plan badge */}
           <button
             onClick={handlePlanClick}
-            className={clsx("w-1/2 flex items-center justify-center space-x-1 rounded-md px-2 py-1 h-8 transition-colors", {
+            className={clsx("w-1/2 flex items-center justify-center space-x-1 rounded-md px-2 py-1 h-10 transition-colors", {
               "bg-gray-100 hover:bg-gray-200 text-gray-700": !user?.plan || user?.plan === 'free',
               "bg-blue-200 hover:bg-blue-300 text-blue-700": user?.plan === 'pro',
               "bg-purple-200 hover:bg-purple-300 text-purple-700": user?.plan === 'pro_plus',
@@ -88,10 +95,15 @@ const Header: React.FC = () => {
 
           {/* Generations left badge */}
           <button
-            className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-8 hover:bg-gray-200 transition-colors"
+            className="w-1/2 flex items-center justify-center space-x-1 bg-gray-100 rounded-lg px-2 py-1 h-10 hover:bg-gray-200 transition-colors"
           >
               <span className="text-xs text-gray-700">
                 <b>{isAuthenticated ? Number(user?.remainingGenerations) : 3}</b>/<b>{isAuthenticated ? Number(user?.totalGenerations) : 3}</b> AI-generations
+                {isAuthenticated && Number(user?.remainingGenerations) > 1 && (
+                  <div className="text-xs text-gray-500">
+                    {`Your limit will reset on ${nextMonth()} 1.`}
+                  </div>
+                )}
               </span>
           </button>
         </div>

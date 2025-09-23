@@ -78,3 +78,17 @@ body {
     transform: translateY(0);
   }
 }
+
+.infinite-loader {
+  width: calc(200px / cos(45deg));
+  max-width: calc(100% - 16px);
+  height: 16px;
+  background: repeating-linear-gradient(-45deg,#2460e8 0 16px,#0000 0 20px) right/200% 100%;
+  animation: infinite-loader 6s infinite linear;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+@keyframes infinite-loader {
+    100% {background-position:left}
+}

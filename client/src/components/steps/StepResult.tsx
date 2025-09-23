@@ -149,8 +149,8 @@ const StepResult: React.FC = () => {
   if (generateResume.loading || generateCoverLetter.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[72vh]">
-        <img src="/generating.svg" alt="Loading" className='h-10 w-10 mb-4' />
         <h2 className='font-medium text-2xl mb-4'>Generating</h2>
+        <div className="infinite-loader"></div>
         <p className='text-gray-500 text-sm'>{generationType === 'cover-letter' ? 'Cover letter' : 'Resume'}</p>
       </div>
     );
