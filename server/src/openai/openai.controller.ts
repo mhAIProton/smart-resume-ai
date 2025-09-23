@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OpenaiService, GenerateResumeRequest, GenerateCoverLetterRequest } from './openai.service';
@@ -31,11 +31,14 @@ export class OpenaiController {
     }
 
     const content = await this.openaiService.generateResume(request);
+    if (!content) {
+      throw new BadRequestException('Failed to generate resume. Please try again.');
+    }
 
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);
 
-    return { content };
+    return { content: JSON.parse(content) };
 
     // Читаем содержимое из resume-example.json
     // const filePath = path.join(process.cwd(), '/json/resume-example.json');
