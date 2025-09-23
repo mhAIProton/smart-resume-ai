@@ -1,3 +1,5 @@
+let isSidePanelOpen = false;
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('SmartResumeAI extension installed')
 })
@@ -9,6 +11,13 @@ chrome.action.onClicked.addListener((tab) => {
     try {
       chrome.sidePanel.open({ windowId: tab.windowId });
       chrome.runtime.sendMessage({ action: 'refreshUserData' });
+
+      if (isSidePanelOpen) {
+        chrome.runtime.sendMessage({ action: 'closeSidePanel' });
+      }
+
+      isSidePanelOpen = !isSidePanelOpen;
+      
     } catch (error) {
       console.error('Error opening side panel:', error)
     }

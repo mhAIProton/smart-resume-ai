@@ -19,8 +19,20 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
 
   const { updateGeneratedContent } = useAppContext();
 
-  const handleNameChange = (newName: string) => {
-    updateGeneratedContent({ full_name: newName } as Partial<PDFResumeData>);
+  const handleResumeDataChange = (property: string, value: string) => {
+    updateGeneratedContent({ [property]: value } as Partial<PDFResumeData>);
+  };
+
+  const handleContactsDataChange = (property: string, value: string) => {
+    updateGeneratedContent({ contacts: { ...resumeData.contacts, [property]: value } } as Partial<PDFResumeData>);
+  };
+
+  const handleSkillsDataChange = (index: number, value: string) => {
+    if (value.trim() === '') {
+      updateGeneratedContent({ skills: resumeData.skills.filter((_, i) => i !== index) } as Partial<PDFResumeData>);
+    } else {
+      updateGeneratedContent({ skills: [...resumeData.skills.slice(0, index), value, ...resumeData.skills.slice(index + 1)] } as Partial<PDFResumeData>);
+    }
   };
 
   return (
@@ -28,37 +40,71 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
       <div className="resume-classic bg-white p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+          <div className="rd-full-name mb-2">
             <EditableContent
               value={resumeData.full_name}
-              onChange={handleNameChange}
+              onChange={(value) => handleResumeDataChange('full_name', value)}
               className="text-2xl font-semibold text-gray-900"
               placeholder="Enter your name"
             />
-          </h1>
-          <h2 className="text-lg text-gray-700">{resumeData.profession}</h2>
+          </div>
+          <div className="rd-profession">
+            <EditableContent
+              value={resumeData.profession}
+              onChange={(value) => handleResumeDataChange('profession', value)}
+              className="text-lg text-gray-700"
+              placeholder="Enter your profession"
+            />
+          </div>
         </div>
 
         {/* Contacts */}
         <div className="mb-6">
-          <div className="flex items-center mb-2">
-            <img src="/icons/pdf-mail.png" alt="Email" className="w-4 h-4 mr-2" />
-            <span className="text-sm text-gray-600">{resumeData.contacts?.email}</span>
-          </div>
-          <div className="flex items-center mb-2">
-            <img src="/icons/pdf-phone.png" alt="Phone" className="w-4 h-4 mr-2" />
-            <span className="text-sm text-gray-600">{resumeData.contacts?.phone}</span>
-          </div>
-          <div className="flex items-center mb-2">
-            <img src="/icons/pdf-link.png" alt="Portfolio" className="w-4 h-4 mr-2" />
-            <span className="text-sm text-gray-600">{resumeData.contacts?.portfolio}</span>
-          </div>
+          {resumeData.contacts?.email && (
+            <div className="flex items-center mb-2">
+              <img src="/icons/pdf-mail.png" alt="Email" className="w-4 h-4 mr-2" />
+              <EditableContent
+                value={resumeData.contacts.email}
+                onChange={(value) => handleContactsDataChange('email', value)}
+                className="text-sm text-gray-600"
+                placeholder="Enter your email"
+              />
+            </div>
+          )}
+          {resumeData.contacts?.phone && (
+            <div className="flex items-center mb-2">
+              <img src="/icons/pdf-phone.png" alt="Phone" className="w-4 h-4 mr-2" />
+              <EditableContent
+                value={resumeData.contacts.phone}
+                onChange={(value) => handleContactsDataChange('phone', value)}
+                className="text-sm text-gray-600"
+                placeholder="Enter your phone"
+              />
+            </div>
+          )}
+          {resumeData.contacts?.portfolio && (
+            <div className="flex items-center mb-2">
+              <img src="/icons/pdf-link.png" alt="Portfolio" className="w-4 h-4 mr-2" />
+              <EditableContent
+                value={resumeData.contacts.portfolio}
+                onChange={(value) => handleContactsDataChange('portfolio', value)}
+                className="text-sm text-gray-600"
+                placeholder="Enter your portfolio"
+              />
+            </div>
+          )}
         </div>
 
         {/* Profile */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Profile</h3>
-          <p className="text-sm text-gray-700 leading-relaxed">{resumeData.summary}</p>
+          <EditableContent
+            value={resumeData.summary}
+            onChange={(value) => handleResumeDataChange('summary', value)}
+            multiline={true}
+            className="text-sm text-gray-700 leading-relaxed w-full"
+            placeholder="Enter your profile"
+          />
         </div>
 
         {/* Skills */}
@@ -66,12 +112,12 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Skills</h3>
           <div className="flex flex-wrap gap-2">
             {resumeData.skills?.map((skill, index) => (
-              <span
-                key={index}
+              <EditableContent
+                value={skill}
+                onChange={(value) => handleSkillsDataChange(index, value)}
                 className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700"
-              >
-                {skill}
-              </span>
+                placeholder="Enter skill"
+              />
             ))}
           </div>
         </div>

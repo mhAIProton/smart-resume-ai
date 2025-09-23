@@ -76,7 +76,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
         className={`${className} bg-transparent border border-blue-300 rounded px-1 py-0.5 focus:outline-none focus:border-blue-500`}
         placeholder={placeholder}
         disabled={disabled}
-        {...(multiline ? { rows: 3 } : {})}
+        {...(multiline ? { rows: 4 } : {})}
       />
     );
   }

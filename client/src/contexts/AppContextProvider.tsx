@@ -363,6 +363,9 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({children}
       if (message.action === 'refreshUserData') {
         checkAuth();
       }
+      if (message.action === 'closeSidePanel') {
+        window.close();
+      }
     };
 
     // Add message listener
