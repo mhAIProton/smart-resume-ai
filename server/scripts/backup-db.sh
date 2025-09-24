@@ -3,6 +3,11 @@
 # PostgreSQL Database Backup Script for Docker
 # This script creates a backup of the PostgreSQL database running in Docker
 
+# Dev command export
+# docker exec smart-resume-ai-pg-dev pg_dump -U postgres -d smart_resume_ai > ./dump.sql
+# Dev command import
+# cat ./dump.sql | docker exec -i smart-resume-ai-pg-test psql -U postgres -d smart_resume_ai
+
 # Load environment variables from .env.local
 if [ -f ".env.local" ]; then
     export $(grep -v '^#' .env.local | xargs)

@@ -177,6 +177,9 @@ export class StripeService {
       [this.configService.get<string>('STRIPE_PRO_PLUS_PRICE_ID')]: UserPlan.PRO_PLUS,
     };
 
+    console.log('priceId', priceId);
+    console.log('priceToPlanMap', priceToPlanMap);
+
     return priceToPlanMap[priceId] || null;
   }
 
