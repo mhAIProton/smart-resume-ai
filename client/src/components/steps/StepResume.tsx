@@ -90,9 +90,9 @@ const StepResume: React.FC = () => {
 
   const hasInput = () => {
     if (selectedOption === 'generate') {
-      return generateText.replace(/\d/g, '').trim().length > 10;
+      return generateText.replace(/\d/g, '').trim().length > 20;
     } else if (selectedOption === 'improve') {
-      return improveText.replace(/\d/g, '').trim().length > 10 || uploadedFile !== null;
+      return improveText.replace(/\d/g, '').trim().length > 20 || uploadedFile !== null;
     }
     return false;
   }

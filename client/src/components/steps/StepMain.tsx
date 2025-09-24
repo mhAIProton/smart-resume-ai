@@ -32,13 +32,10 @@ const StepMain: React.FC = () => {
     }
   }
 
-  const isTextExist = () => {
-    return jobText.replace(/\d/g, '').trim().length >= 10;
-  }
-
-  const isTextTooLarge = () => {
-    return jobText.length > 2000;
-  }
+  const isTextExist = () => jobText.replace(/\d/g, '').trim().length >= 20;
+  const isTextBig = () => jobText.length > 2000 && jobText.length <= 8000;
+  const isTextTooLarge = () => jobText.length > 8000;
+  const isContinueDisabled = () => !isTextExist() || isTextTooLarge();
 
   return (
     <div>
@@ -74,26 +71,32 @@ const StepMain: React.FC = () => {
           className="w-full p-3 border rounded-lg resize-none border-gray-300 bg-gray-200 focus-visible:border-gray-600"
           rows={8}
         />
-        {isTextExist() && (
+        {isTextExist() && !isTextTooLarge() && (
           <div className="mt-2 flex items-center space-x-1">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-sm text-green-600">Text input detected. Ready to continue.</span>
           </div>
         )}
-        {isTextTooLarge() && (
+        {isTextBig() && (
           <div className="mt-2 flex items-center space-x-1">
             <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
             <span className="text-sm text-yellow-600">Large input detected. Please confirm it's the full job description.</span>
+          </div>
+        )}
+        {isTextTooLarge() && (
+          <div className="mt-2 flex items-center space-x-1">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <span className="text-sm text-red-600">Too large input detected. Please shorten it.</span>
           </div>
         )}
       </div>
 
       <button
         onClick={handleContinue}
-        disabled={!isTextExist()}
+        disabled={isContinueDisabled()}
         className={clsx('w-full py-3 px-4 rounded-lg font-medium text-sm transition-colors', {
-          'bg-blue-200 text-white cursor-not-allowed': !isTextExist(),
-          'bg-blue-600 hover:bg-blue-700 text-white': isTextExist(),
+          'bg-blue-200 text-white cursor-not-allowed': isContinueDisabled(),
+          'bg-blue-600 hover:bg-blue-700 text-white': !isContinueDisabled(),
         })}
       >
         Continue
