@@ -164,6 +164,18 @@ export class StripeController {
     }
 
     try {
+      // Save Stripe customer ID and subscription ID
+      const stripeCustomerId = session.customer;
+      const stripeSubscriptionId = session.subscription;
+
+      console.log('stripeCustomerId', stripeCustomerId);
+      console.log('stripeSubscriptionId', stripeSubscriptionId);
+      
+      if (stripeCustomerId) {
+        await this.usersService.updateStripeInfo(userId, stripeCustomerId, stripeSubscriptionId);
+        console.log(`Stripe info updated for user ${userId}: customerId=${stripeCustomerId}, subscriptionId=${stripeSubscriptionId}`);
+      }
+
       if (session.metadata?.type === 'subscription') {
         // Handle subscription activation
         const plan = this.stripeService.getPlanFromPriceId(session.line_items?.data[0]?.price?.id);

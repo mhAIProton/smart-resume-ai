@@ -8,9 +8,10 @@ services:
       - .env.local                # берёт все секреты и ключи
     environment:                 # только то, чего нет в .env
       NODE_ENV: development
+      DB_HOST: smart-resume-ai-pg-test
       PORT: 3000
     ports:
-      - "5555:3000"              # NAT переадресация на порт 5555
+      - "3000:3000"              # NAT переадресация на порт 3000
     networks:
       - smart-resume-ai-test-net
     depends_on:

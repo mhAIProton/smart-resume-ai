@@ -28,7 +28,11 @@ const Header: React.FC = () => {
   };
 
   const handlePlanClick = () => {
-    setShowSubscriptionsPopup(true);
+    if (isAuthenticated) {
+      setShowSubscriptionsPopup(true);
+    } else {
+      setShowAuthModal(true);
+    }
   };
 
   const nextMonth = (): string => {

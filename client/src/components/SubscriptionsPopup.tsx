@@ -46,7 +46,7 @@ const SubscriptionsPopup: React.FC = () => {
     {
       value: 'pro',
       title: 'Pro Plan',
-      price: '$ 10.90',
+      price: '$ 9.90',
       description: '30 AI-generations',
       details: 'Monthly subscription',
       priceId: import.meta.env.VITE_STRIPE_PRO_PRICE_ID

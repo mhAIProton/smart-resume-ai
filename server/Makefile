@@ -122,7 +122,7 @@ test-logs:
 	docker-compose -f docker-compose.test.yml logs -f
 
 test-logs-api:
-	docker-compose -f docker-compose.test.yml logs -f smart-resume-ai-api-test
+	docker-compose -f docker-compose.test.yml logs -f smart-resume-ai-api
 
 test-logs-db:
 	docker-compose -f docker-compose.test.yml logs -f smart-resume-ai-pg-test
@@ -140,3 +140,8 @@ test-clean:
 	docker-compose -f docker-compose.test.yml down -v --remove-orphans
 
 test-rebuild: test-clean test-up
+
+test-rebuild-api:
+	docker-compose -f docker-compose.test.yml down smart-resume-ai-api
+	docker-compose -f docker-compose.test.yml build smart-resume-ai-api
+	docker-compose -f docker-compose.test.yml up -d smart-resume-ai-api
