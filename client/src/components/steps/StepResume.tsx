@@ -16,8 +16,9 @@ const StepResume: React.FC = () => {
 
   const uploadFile = useUploadFile();
 
-  const exampleText = '5+ years in product design, skilled in Figma, UX writing, accessibility, looking for a role in health tech';
-
+  const EXAMPLE_TEXT = '5+ years in product design, skilled in Figma, UX writing, accessibility, looking for a role in health tech';
+  const MAX_TEXT_LENGTH = 8000;
+  
   // Восстанавливаем данные из контекста при загрузке компонента
   useEffect(() => {
     if (resumeData) {
@@ -59,20 +60,24 @@ const StepResume: React.FC = () => {
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
+
     if (file && file.type === 'application/pdf') {
       setUploadedFile(file);
 
       try {
         // Загружаем файл на сервер и извлекаем текст
         const content = await uploadFile.execute(file);
+
         if (content) {
           setImproveText(content);
-          toast.success('File uploaded and text extracted successfully!');
+        } else {
+          setUploadedFile(null);
+          setImproveText('');
+          event.target.value = '';
         }
       } catch (error) {
         console.error('File upload error:', error);
-        setUploadedFile(null);
       }
     } else {
       toast.error('Please select a valid PDF file');
@@ -88,12 +93,17 @@ const StepResume: React.FC = () => {
     }
   }
 
-  const hasInput = () => {
+  const isValidInput = () => {
+    let text = '';
+
     if (selectedOption === 'generate') {
-      return generateText.replace(/\d/g, '').trim().length > 20;
+      text = generateText.replace(/\d/g, '').trim();
+      return text.length > 20 && text.length <= MAX_TEXT_LENGTH;
     } else if (selectedOption === 'improve') {
-      return improveText.replace(/\d/g, '').trim().length > 20 || uploadedFile !== null;
+      text = improveText.replace(/\d/g, '').trim();
+      return (text.length > 20 && text.length <= MAX_TEXT_LENGTH) || uploadedFile !== null;
     }
+
     return false;
   }
 
@@ -140,10 +150,16 @@ const StepResume: React.FC = () => {
                     rows={4}
                   />
 
-                  {hasInput() && (
+                  {isValidInput() && (
                     <div className="flex items-center space-x-1 py-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-green-600">Text input detected. Ready to continue</span>
+                    </div>
+                  )}
+                  {generateText.length > MAX_TEXT_LENGTH && (
+                    <div className="flex items-center space-x-1 py-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-red-600">Text input is too large. Please shorten it.</span>
                     </div>
                   )}
 
@@ -159,7 +175,7 @@ const StepResume: React.FC = () => {
 
                   {showExample && (
                     <div className="bg-gray-50 text-sm text-gray-400 py-2">
-                      {exampleText}
+                      {EXAMPLE_TEXT}
                     </div>
                   )}
                 </div>
@@ -280,11 +296,17 @@ const StepResume: React.FC = () => {
                     </div>
                   )}
 
-                  {hasInput() && (
+                  {isValidInput() && (
                     <div className="flex items-center space-x-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span
-                        className="text-sm text-green-600">User input detected. Ready to continue</span>
+                        className="text-sm text-green-600">Text input detected. Ready to continue</span>
+                    </div>
+                  )}
+                  {improveText.length > MAX_TEXT_LENGTH && (
+                    <div className="flex items-center space-x-1 py-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-red-600">Text input is too large. Please shorten it.</span>
                     </div>
                   )}
                 </div>
@@ -296,9 +318,9 @@ const StepResume: React.FC = () => {
 
       <button
         onClick={selectedOption === 'generate' ? handleGenerateContinue : handleImproveContinue}
-        disabled={!hasInput()}
+        disabled={!isValidInput()}
         className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-colors ${
-          hasInput()
+          isValidInput()
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
         }`}

@@ -166,16 +166,16 @@ export class OpenaiService {
   async extractTextFromPDF(file: Express.Multer.File): Promise<string> {
     try {
       const pdfBuffer = file.buffer;
-      const data = await pdfParse(pdfBuffer);
+      const data = await pdfParse(pdfBuffer, { max: 10 });
       
       if (!data.text || data.text.trim().length === 0) {
-        throw new BadRequestException('No text found in PDF file');
+        throw new BadRequestException('No text found in PDF file. Please upload a valid PDF file.');
       }
 
       return data.text.trim();
     } catch (error) {
       console.error('PDF parsing error:', error);
-      throw new BadRequestException('Failed to extract text from PDF file');
+      throw new BadRequestException('No text found in PDF file. Please upload a valid PDF file.');
     }
   }
 }

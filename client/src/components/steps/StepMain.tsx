@@ -13,7 +13,7 @@ const StepMain: React.FC = () => {
   const [jobText, setJobText] = useState('');
   const [showExample, setShowExample] = useState(false);
 
-  const exampleJobDescription = `We're looking for a Marketing Specialist to help plan and execute marketing campaigns across social media, email, and ads. You'll work with the content team, update the website, and support events like webinars and trade shows.`;
+  const EXAMPLE_JOB_DESCRIPTION = `We're looking for a Marketing Specialist to help plan and execute marketing campaigns across social media, email, and ads. You'll work with the content team, update the website, and support events like webinars and trade shows.`;
 
   // Восстанавливаем текст из контекста при загрузке компонента
   useEffect(() => {
@@ -58,7 +58,7 @@ const StepMain: React.FC = () => {
       {showExample && (
         <div className="mb-6">
           <div className="text-sm text-gray-400">
-            {exampleJobDescription}
+            {EXAMPLE_JOB_DESCRIPTION}
           </div>
         </div>
       )}

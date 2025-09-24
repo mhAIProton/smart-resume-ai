@@ -22,6 +22,7 @@ const StepResult: React.FC = () => {
     regenerateComment,
     generatedContent,
     setGeneratedContent,
+    setSelectedDesign,
     setShowSubscriptionsPopup,
   } = useAppContext();
   const {navigate} = useNavigation();
@@ -120,6 +121,7 @@ const StepResult: React.FC = () => {
         toast.error('Failed to generate PDF. Please try again.');
       }
     } else {
+      setSelectedDesign(null);
       navigate('design');
     }
   };

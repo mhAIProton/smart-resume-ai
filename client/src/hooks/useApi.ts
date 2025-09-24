@@ -44,7 +44,15 @@ export function useApi<T = any>(
       
       return result;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+      let errorMessage = 'An error occurred';
+
+      // Обрабатываем различные типы ошибок
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setState({ data: null, loading: false, error: errorMessage });
       
       if (options?.onError) {
@@ -85,7 +93,7 @@ export function useGenerateCoverLetter() {
 
 export function useUploadFile() {
   return useApi(apiService.uploadFile.bind(apiService), {
-    showToast: false, // Показываем toast вручную в компоненте
+    showToast: true,
   });
 }
 
