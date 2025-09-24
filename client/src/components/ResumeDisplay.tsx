@@ -11,7 +11,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
   // В случае если ResumeData - текст, засовываем его в простой шаблон
   if (typeof resumeData === 'string') {
     return (
-      <div className="resume-classic bg-white p-6 max-w-4xl mx-auto">
+      <div id="resume-content" className="resume-classic bg-white p-6 max-w-4xl mx-auto">
         {resumeData}
       </div>
     );
@@ -36,7 +36,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
   };
 
   return (
-    <div className="resume-display">
+    <div id="resume-content">
       <div className="resume-classic bg-white p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -115,7 +115,7 @@ const ResumeDisplay: React.FC<ResumeDisplayProps> = ({ resumeData }) => {
               <EditableContent
                 value={skill}
                 onChange={(value) => handleSkillsDataChange(index, value)}
-                className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700"
+                className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700 hover:translate-y-[-2px] hover:shadow-md transition-transform duration-200"
                 placeholder="Enter skill"
               />
             ))}

@@ -110,3 +110,33 @@ dev-clean:
 
 dev-sync:
 	npx typeorm-ts-node-commonjs schema:sync -d src/database/data-source.ts
+
+# Test environment commands
+test-up:
+	docker-compose -f docker-compose.test.yml up -d
+
+test-down:
+	docker-compose -f docker-compose.test.yml down
+
+test-logs:
+	docker-compose -f docker-compose.test.yml logs -f
+
+test-logs-api:
+	docker-compose -f docker-compose.test.yml logs -f smart-resume-ai-api-test
+
+test-logs-db:
+	docker-compose -f docker-compose.test.yml logs -f smart-resume-ai-pg-test
+
+test-shell:
+	docker-compose -f docker-compose.test.yml exec smart-resume-ai-api-test sh
+
+test-db-shell:
+	docker-compose -f docker-compose.test.yml exec smart-resume-ai-pg-test sh
+
+test-db-psql:
+	docker-compose -f docker-compose.test.yml exec smart-resume-ai-pg-test psql -U postgres -d smart_resume_ai
+
+test-clean:
+	docker-compose -f docker-compose.test.yml down -v --remove-orphans
+
+test-rebuild: test-clean test-up

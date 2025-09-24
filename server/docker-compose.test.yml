@@ -1,0 +1,43 @@
+services:
+  smart-resume-ai-api:
+    build:                       # собираем локально
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: smart-resume-ai-api-test
+    env_file:
+      - .env.local                # берёт все секреты и ключи
+    environment:                 # только то, чего нет в .env
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "5555:3000"              # NAT переадресация на порт 5555
+    networks:
+      - smart-resume-ai-test-net
+    depends_on:
+      - smart-resume-ai-pg-test  # ждём Postgres
+    restart: unless-stopped
+
+  smart-resume-ai-pg-test:
+    image: postgres:15
+    container_name: smart-resume-ai-pg-test
+    env_file:
+      - .env.local              # POSTGRES_* переменные берутся отсюда
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - smart-resume-ai-test-net
+    restart: unless-stopped
+    command: postgres -c 'max_connections=200'
+
+volumes:
+  postgres-test-data:
+
+networks:
+  smart-resume-ai-test-net:
+    driver: bridge

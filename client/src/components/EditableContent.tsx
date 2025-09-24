@@ -83,7 +83,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
 
   return (
     <span
-      className={`${className} ${isHovered && !disabled ? 'bg-gray-100 rounded px-1 py-0.5 cursor-text' : ''} ${disabled ? 'cursor-default' : 'cursor-text'}`}
+      className={`${className} ${isHovered && !disabled ? 'bg-gray-100 rounded cursor-text' : ''} ${disabled ? 'cursor-default' : 'cursor-text'}`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

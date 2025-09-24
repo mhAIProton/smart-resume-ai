@@ -561,26 +561,8 @@ class PDFService {
     
     this.currentY = this.margin;
     
-    // Добавляем заголовок
-    this.pdf.setFontSize(16);
-    this.pdf.setFont(this.fontFamily, 'bold');
-    this.pdf.text('Cover Letter', this.margin, this.currentY);
-    this.addCurrentY(15);
-    
-    // Добавляем дату
-    this.pdf.setFontSize(8);
-    this.pdf.setFont(this.fontFamily, 'normal');
-    const currentDate = new Date().toLocaleDateString();
-    this.pdf.text(`Generated on: ${currentDate}`, this.margin, this.currentY);
-    this.addCurrentY(10);
-    
-    // Добавляем разделительную линию
-    this.pdf.setLineWidth(0.5);
-    this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.addCurrentY(10);
-    
     // Добавляем основной контент используя существующий метод
-    this.addWrappedText(content, 10);
+    this.addBoxedText(content, { fontSize: 10 });
   }
 
   // Метод для скачивания PDF

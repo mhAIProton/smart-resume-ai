@@ -40,12 +40,10 @@ export class OpenaiController {
 
     return { content };
 
-    // Читаем содержимое из resume-example.json
+    // Читаем содержимое из resume-example.json // DEV-ONLY
     // const filePath = path.join(process.cwd(), '/json/resume-example.json');
     // const fileContent = fs.readFileSync(filePath, 'utf8');
-    // const resumeData = JSON.parse(fileContent);
-    //
-    // return { content: resumeData };
+    // return { content: fileContent };
   }
 
   @Post('generate-cover-letter')
@@ -60,6 +58,10 @@ export class OpenaiController {
     }
 
     const content = await this.openaiService.generateCoverLetter(request);
+    if (!content) {
+      throw new BadRequestException('Failed to generate cover letter. Please try again.');
+    }
+    // const content = 'lorem ipsum dolor sit amet, consectetur adipiscing elit. nunc efficitur ultrices orci, at blandit sapien. nam quam lectus, viverra vitae massa quis, lacinia congue odio. proin porta nibh id elit rutrum, laoreet placerat neque posuere. duis suscipit urna ex. suspendisse malesuada velit et ligula egestas mattis. fusce lacinia purus tortor, ac dignissim ex hendrerit ac. praesent quis consequat dolor. praesent vel enim neque. cras interdum mattis lacus in facilisis., , aenean elit purus, volutpat vel imperdiet ac, porttitor sit amet leo. vivamus blandit tristique nisl, quis tempor elit facilisis sed. aliquam tellus augue, vestibulum et tincidunt eu, porta a tortor. nulla facilisi. etiam dignissim nunc a elit tristique consectetur. ut tristique metus et purus luctus, cursus iaculis nisl aliquam. donec laoreet urna lorem, vel eleifend turpis condimentum vitae. integer eu vehicula augue. maecenas posuere sodales eros, eget faucibus libero suscipit sed., , donec pretium quam quis tellus commodo varius. morbi sed viverra tortor. praesent faucibus ultrices ex eu fermentum. nam ullamcorper lacinia ante, a hendrerit ligula pellentesque sed. vivamus sollicitudin lacinia tortor vel sodales. quisque posuere posuere sem, eu feugiat arcu finibus quis. in ultrices velit mi, quis pulvinar augue consectetur ut. in hac habitasse platea dictumst. quisque turpis ipsum, interdum pharetra nibh sit amet, rhoncus sodales neque. nam facilisis diam sapien, in luctus nibh porttitor et. integer eu massa massa., , donec facilisis turpis vitae ante bibendum euismod. duis vel lacus ornare, hendrerit sapien sit amet, cursus nunc. cras mattis velit ut lacus lacinia, et elementum erat hendrerit. donec in suscipit ex. donec dictum a dolor et vestibulum. sed nec cursus mi. sed pretium tincidunt dui, non pharetra nibh pellentesque finibus. donec ullamcorper congue eros, ac facilisis nisl suscipit in. curabitur sollicitudin congue diam eget condimentum. pellentesque luctus turpis eu est interdum fermentum. in non tellus non mi vehicula pellentesque vel ac dui., , pellentesque turpis lacus, condimentum eget rutrum id, gravida in nibh. sed eget orci vulputate, gravida dui ut, blandit tellus. suspendisse tempor magna lobortis mauris facilisis, non pharetra lectus laoreet. nullam sagittis metus in purus fermentum lobortis. aenean venenatis luctus eros id pellentesque. donec non felis quam. donec neque massa, posuere ut massa eu, suscipit hendrerit turpis. nunc odio diam, consectetur in velit sed, tempor sollicitudin odio.';
 
     // Уменьшаем количество доступных генераций
     await this.usersService.decrementGenerations(user.id);

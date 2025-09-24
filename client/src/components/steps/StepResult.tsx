@@ -88,7 +88,12 @@ const StepResult: React.FC = () => {
 
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(typeof generatedContent === 'string' ? generatedContent : JSON.stringify(generatedContent));
+      const content = document.getElementById(generationType === 'cover-letter' ? 'cover-letter-content' : 'resume-content')?.innerText;
+      if (!content) {
+        toast.error('No content to copy');
+        return;
+      }
+      await navigator.clipboard.writeText(content);
       setCopied(true);
       toast.success('Text copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
@@ -103,13 +108,15 @@ const StepResult: React.FC = () => {
 
   const handleDownloadPDF = () => {
     if (generationType === 'cover-letter') {
-      if (!generatedContent) {
+      const content = document.getElementById('cover-letter-content')?.innerText;
+
+      if (!content) {
         toast.error('No content to download');
         return;
       }
 
       try {
-        pdfService.generateCoverLetterPDF(generatedContent as string);
+        pdfService.generateCoverLetterPDF(content);
 
         const timestamp = new Date().toISOString().split('T')[0];
         const fileName = `cover-letter_${timestamp}.pdf`;
@@ -197,7 +204,7 @@ const StepResult: React.FC = () => {
         <div className="draft-container bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-y-auto">
           <div className="whitespace-pre-line text-sm text-gray-800 font-mono leading-relaxed">
             {generationType === 'cover-letter'
-              ? generatedContent as string
+              ? <div id="cover-letter-content" contentEditable>{generatedContent as string}</div>
               : <ResumeDisplay resumeData={generatedContent as ResumeData | string} />
             }
           </div>
