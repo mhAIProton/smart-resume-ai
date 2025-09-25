@@ -168,9 +168,6 @@ export class StripeController {
       const stripeCustomerId = session.customer;
       const stripeSubscriptionId = session.subscription;
 
-      console.log('stripeCustomerId', stripeCustomerId);
-      console.log('stripeSubscriptionId', stripeSubscriptionId);
-      
       if (stripeCustomerId) {
         await this.usersService.updateStripeInfo(userId, stripeCustomerId, stripeSubscriptionId);
         console.log(`Stripe info updated for user ${userId}: customerId=${stripeCustomerId}, subscriptionId=${stripeSubscriptionId}`);
@@ -178,7 +175,7 @@ export class StripeController {
 
       if (session.metadata?.type === 'subscription') {
         // Handle subscription activation
-        const plan = this.stripeService.getPlanFromPriceId(session.line_items?.data[0]?.price?.id);
+        const plan = this.stripeService.getPlanFromPriceId(session.amount_total);
         if (plan) {
           await this.usersService.activateSubscription(userId, plan);
           console.log(`Subscription activated for user ${userId}, plan: ${plan}`);
@@ -258,7 +255,7 @@ export class StripeController {
       }
 
       // Получаем subscription ID из invoice
-      const subscriptionId = invoice.subscription;
+      const subscriptionId = invoice.subscription || invoice.parent?.subscription_details?.subscription;;
       if (!subscriptionId) {
         console.error('No subscription ID in invoice');
         return;

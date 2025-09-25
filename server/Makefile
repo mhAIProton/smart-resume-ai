@@ -139,9 +139,7 @@ test-db-psql:
 test-clean:
 	docker-compose -f docker-compose.test.yml down -v --remove-orphans
 
-test-rebuild: test-clean test-up
+test-restart: test-clean test-up
 
-test-rebuild-api:
-	docker-compose -f docker-compose.test.yml down smart-resume-ai-api
-	docker-compose -f docker-compose.test.yml build smart-resume-ai-api
-	docker-compose -f docker-compose.test.yml up -d smart-resume-ai-api
+test-build-api:
+	docker-compose -f docker-compose.test.yml up -d --build smart-resume-ai-api

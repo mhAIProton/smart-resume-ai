@@ -173,12 +173,9 @@ export class StripeService {
   getPlanFromPriceId(priceId: string): UserPlan | null {
     // Map Stripe price IDs to user plans
     const priceToPlanMap = {
-      [this.configService.get<string>('STRIPE_PRO_PRICE_ID')]: UserPlan.PRO,
-      [this.configService.get<string>('STRIPE_PRO_PLUS_PRICE_ID')]: UserPlan.PRO_PLUS,
+      990: UserPlan.PRO,
+      1990: UserPlan.PRO_PLUS,
     };
-
-    console.log('priceId', priceId);
-    console.log('priceToPlanMap', priceToPlanMap);
 
     return priceToPlanMap[priceId] || null;
   }
