@@ -1,18 +1,26 @@
+version: '3.8'
+
 services:
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: smart-resume-ai-proxy
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: smart-resume-ai-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/vhost.d:/etc/nginx/vhost.d
-      - ./nginx/html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/html:/var/www/html:ro
     networks:
       - smart-resume-ai-net
+    depends_on:
+      - smart-resume-ai-api
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   smart-resume-ai-api:
     build:                       # собираем локально
@@ -20,13 +28,13 @@ services:
       dockerfile: Dockerfile.prod
     container_name: smart-resume-ai-api
     env_file:
-      - .env.local                # берёт все секреты и ключи
-    environment:                 # только то, чего нет в .env
+      - .env.local
+    environment:
       NODE_ENV: production
-      VIRTUAL_HOST: smartresume-ai.com
-      VIRTUAL_PORT: 3000
-      LETSENCRYPT_HOST: smartresume-ai.com
-      LETSENCRYPT_EMAIL: resumecopilotai@gmail.com
+      PORT: 3000
+      API_PREFIX: /api/v1
+      CORS_ORIGIN: https://smartresume-ai.com
+      CORS_CREDENTIALS: true
     networks:
       - smart-resume-ai-net
     depends_on:
@@ -37,7 +45,7 @@ services:
     image: postgres:15
     container_name: smart-resume-ai-pg
     env_file:
-      - .env.local              # POSTGRES_* переменные берутся отсюда
+      - .env.local
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./backups:/backups

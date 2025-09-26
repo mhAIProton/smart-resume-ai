@@ -10,7 +10,7 @@ const AuthModal: React.FC = () => {
       setIsLoading(true);
       setOauthError(false);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://smartresume-ai.com/api/v1';
       
       // Отправляем сообщение в background script
       chrome.runtime.sendMessage({ action: 'googleAuth', apiUrl }, async (response) => {

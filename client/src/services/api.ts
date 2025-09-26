@@ -41,7 +41,7 @@ class ApiService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+    this.baseURL = import.meta.env.VITE_API_URL || 'https://smartresume-ai.com/api/v1';
     
     this.api = axios.create({
       baseURL: this.baseURL,
